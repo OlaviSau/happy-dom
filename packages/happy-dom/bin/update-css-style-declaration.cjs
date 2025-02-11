@@ -1,7 +1,6 @@
 const { readFile, writeFile } = require('node:fs/promises');
 
-const CSS_STYLE_DECLARATION_FILE_PATH =
-	'./packages/happy-dom/src/css/declaration/CSSStyleDeclaration.ts';
+const CSS_STYLE_DECLARATION_FILE_PATH = './src/css/declaration/CSSStyleDeclaration.ts';
 
 (async () => {
 	const content = await readFile(CSS_STYLE_DECLARATION_FILE_PATH, { encoding: 'utf8' });
@@ -21,11 +20,11 @@ const CSS_STYLE_DECLARATION_FILE_PATH =
 
 	const lines = [];
 
-	lines.unshift('\t// +CSSProperties');
 	lines.unshift('\t/* eslint-disable @typescript-eslint/member-ordering */');
+	lines.unshift('\t// +CSSProperties');
 
 	for (const property of propertySet) {
-		lines.push(CSSPropertyToJavaScriptProperty(property));
+		lines.push(`\tpublic declare ${CSSPropertyToJavaScriptProperty(property)}: string;`);
 	}
 
 	lines.push('\t/* eslint-enable @typescript-eslint/member-ordering */');
@@ -33,7 +32,7 @@ const CSS_STYLE_DECLARATION_FILE_PATH =
 
 	await writeFile(
 		CSS_STYLE_DECLARATION_FILE_PATH,
-		content.replace(/\/\/ \+CSSProperties.*\/\/ -CSSProperties/, lines.join('\n'))
+		content.replace(/\t\/\/ \+CSSProperties(.|\n)*\t\/\/ -CSSProperties/, lines.join('\n'))
 	);
 })();
 

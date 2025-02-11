@@ -75,7 +75,7 @@
 		"test:ui": "vitest --ui",
 		"test:watch": "vitest",
 		"test:debug": "vitest run --inspect-brk --no-file-parallelism",
-		"update:css-style-declaration": "node ./bin/update-css-style-declaration.js"
+		"update:css-style-declaration": "node ./bin/update-css-style-declaration.cjs"
 	},
 	"dependencies": {
 		"webidl-conversions": "^7.0.0",
