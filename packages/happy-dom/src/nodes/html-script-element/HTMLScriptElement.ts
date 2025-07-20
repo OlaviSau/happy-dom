@@ -1,7 +1,6 @@
 import HTMLElement from '../html-element/HTMLElement.js';
 import * as PropertySymbol from '../../PropertySymbol.js';
 import Event from '../../event/Event.js';
-import ErrorEvent from '../../event/events/ErrorEvent.js';
 import WindowBrowserContext from '../../window/WindowBrowserContext.js';
 import BrowserErrorCaptureEnum from '../../browser/enums/BrowserErrorCaptureEnum.js';
 import Attr from '../attr/Attr.js';
@@ -12,6 +11,7 @@ import ModuleFactory from '../../module/ModuleFactory.js';
 import DOMTokenList from '../../dom/DOMTokenList.js';
 import IModuleImportMap from '../../module/IModuleImportMap.js';
 import IRequestReferrerPolicy from '../../fetch/types/IRequestReferrerPolicy.js';
+import ElementEventAttributeUtility from '../element/ElementEventAttributeUtility.js';
 
 /**
  * HTML Script Element.
@@ -23,16 +23,34 @@ export default class HTMLScriptElement extends HTMLElement {
 	// Public properties
 	public declare cloneNode: (deep?: boolean) => HTMLScriptElement;
 
-	// Events
-	public onerror: (event: ErrorEvent) => void = null;
-	public onload: (event: Event) => void = null;
-
 	// Internal properties
 	public [PropertySymbol.evaluateScript] = true;
 	public [PropertySymbol.blocking]: DOMTokenList | null = null;
 
 	// Private properties
 	#loadedScriptURL: string | null = null;
+
+	// Events
+
+	/* eslint-disable jsdoc/require-jsdoc */
+
+	public get onerror(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onerror');
+	}
+
+	public set onerror(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onerror', value);
+	}
+
+	public get onload(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onload');
+	}
+
+	public set onload(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onload', value);
+	}
+
+	/* eslint-enable jsdoc/require-jsdoc */
 
 	/**
 	 * Returns type.
@@ -201,10 +219,10 @@ export default class HTMLScriptElement extends HTMLElement {
 		}
 
 		try {
-			return new URL(this.getAttribute('src'), this[PropertySymbol.ownerDocument].location.href)
+			return new URL(this.getAttribute('src')!, this[PropertySymbol.ownerDocument].location.href)
 				.href;
 		} catch (e) {
-			return this.getAttribute('src');
+			return this.getAttribute('src')!;
 		}
 	}
 
@@ -394,7 +412,7 @@ export default class HTMLScriptElement extends HTMLElement {
 		const browserSettings = new WindowBrowserContext(window).getSettings();
 		const browserFrame = new WindowBrowserContext(window).getBrowserFrame();
 
-		if (!browserFrame) {
+		if (!browserFrame || !browserSettings) {
 			return;
 		}
 
@@ -412,7 +430,7 @@ export default class HTMLScriptElement extends HTMLElement {
 			try {
 				await module.evaluate();
 			} catch (error) {
-				window[PropertySymbol.dispatchError](error);
+				window[PropertySymbol.dispatchError](<Error>error);
 				return;
 			}
 		}
@@ -432,11 +450,14 @@ export default class HTMLScriptElement extends HTMLElement {
 		const browserSettings = new WindowBrowserContext(window).getSettings();
 		const browserFrame = new WindowBrowserContext(window).getBrowserFrame();
 
-		if (!browserFrame || window[PropertySymbol.moduleImportMap]) {
+		if (!browserFrame || !browserSettings || window[PropertySymbol.moduleImportMap]) {
 			return;
 		}
 
-		let json: any;
+		let json: {
+			imports?: Record<string, string>;
+			scopes?: Record<string, Record<string, string>>;
+		};
 		if (
 			browserSettings.disableErrorCapturing ||
 			browserSettings.errorCapture !== BrowserErrorCaptureEnum.tryAndCatch
@@ -446,7 +467,7 @@ export default class HTMLScriptElement extends HTMLElement {
 			try {
 				json = JSON.parse(source);
 			} catch (error) {
-				window[PropertySymbol.dispatchError](error);
+				window[PropertySymbol.dispatchError](<Error>error);
 				return;
 			}
 		}
@@ -468,7 +489,10 @@ export default class HTMLScriptElement extends HTMLElement {
 
 			if (json.scopes) {
 				for (const scopeKey of Object.keys(json.scopes)) {
-					const scope = {
+					const scope: {
+						scope: string;
+						rules: { from: string; to: string }[];
+					} = {
 						scope: scopeKey,
 						rules: []
 					};
@@ -492,7 +516,7 @@ export default class HTMLScriptElement extends HTMLElement {
 	 *
 	 * @param source Source.
 	 */
-	#evaluateScript(source: string): Promise<void> {
+	#evaluateScript(source: string): void {
 		const window = this[PropertySymbol.window];
 		const browserSettings = new WindowBrowserContext(window).getSettings();
 
@@ -513,7 +537,7 @@ export default class HTMLScriptElement extends HTMLElement {
 			try {
 				window.eval(code);
 			} catch (error) {
-				window[PropertySymbol.dispatchError](error);
+				window[PropertySymbol.dispatchError](<Error>error);
 			}
 		}
 
@@ -530,7 +554,7 @@ export default class HTMLScriptElement extends HTMLElement {
 		const browserFrame = new WindowBrowserContext(window).getBrowserFrame();
 		const browserSettings = new WindowBrowserContext(window).getSettings();
 
-		if (!browserSettings) {
+		if (!browserFrame || !browserSettings) {
 			return;
 		}
 
@@ -549,7 +573,7 @@ export default class HTMLScriptElement extends HTMLElement {
 					`Failed to load module "${url}". JavaScript file loading is disabled.`,
 					DOMExceptionNameEnum.notSupportedError
 				);
-				browserFrame.page?.console.error(error);
+				browserFrame.page.console.error(error);
 				this.dispatchEvent(new Event('error'));
 			}
 			return;
@@ -573,7 +597,7 @@ export default class HTMLScriptElement extends HTMLElement {
 				const module = await ModuleFactory.getModule(window, window.location, url);
 				await module.evaluate();
 			} catch (error) {
-				browserFrame.page?.console.error(error);
+				browserFrame.page.console.error(error);
 				this.dispatchEvent(new Event('error'));
 				readyStateManager.endTask();
 				return;
@@ -597,7 +621,7 @@ export default class HTMLScriptElement extends HTMLElement {
 			return;
 		}
 
-		const browserSettings = browserFrame.page?.context?.browser?.settings;
+		const browserSettings = browserFrame.page.context.browser.settings;
 		const type = this.getAttribute('type');
 
 		if (
@@ -634,7 +658,7 @@ export default class HTMLScriptElement extends HTMLElement {
 					`Failed to load script "${absoluteURL}". JavaScript file loading is disabled.`,
 					DOMExceptionNameEnum.notSupportedError
 				);
-				browserFrame.page?.console.error(error);
+				browserFrame.page.console.error(error);
 				this.dispatchEvent(new Event('error'));
 			}
 			return;
@@ -657,7 +681,7 @@ export default class HTMLScriptElement extends HTMLElement {
 					referrerPolicy: this.referrerPolicy
 				});
 			} catch (error) {
-				browserFrame.page?.console.error(error);
+				browserFrame.page.console.error(error);
 				this.dispatchEvent(new Event('error'));
 				return;
 			}
@@ -670,7 +694,7 @@ export default class HTMLScriptElement extends HTMLElement {
 					referrerPolicy: this.referrerPolicy
 				});
 			} catch (error) {
-				browserFrame.page?.console.error(error);
+				browserFrame.page.console.error(error);
 				this.dispatchEvent(new Event('error'));
 				return;
 			}
@@ -690,7 +714,7 @@ export default class HTMLScriptElement extends HTMLElement {
 				this[PropertySymbol.window].eval(code);
 			} catch (error) {
 				this[PropertySymbol.ownerDocument][PropertySymbol.currentScript] = null;
-				window[PropertySymbol.dispatchError](error);
+				window[PropertySymbol.dispatchError](<Error>error);
 				return;
 			}
 		}

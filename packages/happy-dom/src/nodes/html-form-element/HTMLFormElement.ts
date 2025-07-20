@@ -17,6 +17,10 @@ import ClassMethodBinder from '../../utilities/ClassMethodBinder.js';
 import Node from '../node/Node.js';
 import Element from '../element/Element.js';
 import EventTarget from '../../event/EventTarget.js';
+import HTMLDialogElement from '../html-dialog-element/HTMLDialogElement.js';
+import ElementEventAttributeUtility from '../element/ElementEventAttributeUtility.js';
+import HTMLTextAreaElement from '../html-text-area-element/HTMLTextAreaElement.js';
+import HTMLOutputElement from '../html-output-element/HTMLOutputElement.js';
 
 /**
  * HTML Form Element.
@@ -32,10 +36,7 @@ export default class HTMLFormElement extends HTMLElement {
 	public [PropertySymbol.elements]: HTMLFormControlsCollection | null = null;
 	public [PropertySymbol.proxy]: HTMLFormElement;
 
-	// Events
-	public onformdata: ((event: Event) => void) | null = null;
-	public onreset: ((event: Event) => void) | null = null;
-	public onsubmit: ((event: Event) => void) | null = null;
+	/* eslint-enable jsdoc/require-jsdoc */
 
 	/**
 	 * Constructor.
@@ -58,7 +59,7 @@ export default class HTMLFormElement extends HTMLElement {
 				}
 				if (property in target || typeof property === 'symbol') {
 					methodBinder.bind(property);
-					return target[property];
+					return (<any>target)[property];
 				}
 				const index = Number(property);
 				if (!isNaN(index)) {
@@ -69,23 +70,23 @@ export default class HTMLFormElement extends HTMLElement {
 			set(target, property, newValue): boolean {
 				methodBinder.bind(property);
 				if (typeof property === 'symbol') {
-					target[property] = newValue;
+					(<any>target)[property] = newValue;
 					return true;
 				}
 				const index = Number(property);
 				if (isNaN(index)) {
-					target[property] = newValue;
+					(<any>target)[property] = newValue;
 				}
 				return true;
 			},
 			deleteProperty(target, property): boolean {
 				if (typeof property === 'symbol') {
-					delete target[property];
+					delete (<any>target)[property];
 					return true;
 				}
 				const index = Number(property);
 				if (isNaN(index)) {
-					delete target[property];
+					delete (<any>target)[property];
 				}
 				return true;
 			},
@@ -137,7 +138,7 @@ export default class HTMLFormElement extends HTMLElement {
 
 				return false;
 			},
-			getOwnPropertyDescriptor(target, property): PropertyDescriptor {
+			getOwnPropertyDescriptor(target, property): PropertyDescriptor | undefined {
 				if (property in target) {
 					return Object.getOwnPropertyDescriptor(target, property);
 				}
@@ -172,6 +173,34 @@ export default class HTMLFormElement extends HTMLElement {
 		this[PropertySymbol.proxy] = proxy;
 		this[PropertySymbol.formNode] = proxy;
 		return proxy;
+	}
+
+	// Events
+
+	/* eslint-disable jsdoc/require-jsdoc */
+
+	public get onformdata(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onformdata');
+	}
+
+	public set onformdata(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onformdata', value);
+	}
+
+	public get onreset(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onreset');
+	}
+
+	public set onreset(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onreset', value);
+	}
+
+	public get onsubmit(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onsubmit');
+	}
+
+	public set onsubmit(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onsubmit', value);
 	}
 
 	/**
@@ -263,7 +292,7 @@ export default class HTMLFormElement extends HTMLElement {
 		}
 
 		try {
-			return new URL(this.getAttribute('action'), this[PropertySymbol.ownerDocument].location.href)
+			return new URL(this.getAttribute('action')!, this[PropertySymbol.ownerDocument].location.href)
 				.href;
 		} catch (e) {
 			return '';
@@ -409,14 +438,16 @@ export default class HTMLFormElement extends HTMLElement {
 		for (const element of this[PropertySymbol.getFormControlItems]()) {
 			switch (element[PropertySymbol.tagName]) {
 				case 'TEXTAREA':
-					element[PropertySymbol.value] = null;
+					(<HTMLTextAreaElement>element)[PropertySymbol.value] = null;
 					break;
 				case 'INPUT':
-					element[PropertySymbol.value] = null;
-					element[PropertySymbol.checked] = null;
+					(<HTMLInputElement>element)[PropertySymbol.value] = null;
+					(<HTMLInputElement>element)[PropertySymbol.checked] = null;
 					break;
 				case 'OUTPUT':
-					element.textContent = element[PropertySymbol.defaultValue];
+					(<HTMLOutputElement>element).textContent = (<HTMLOutputElement>element)[
+						PropertySymbol.defaultValue
+					];
 					break;
 				case 'SELECT':
 					let hasSelectedAttribute = false;
@@ -547,6 +578,26 @@ export default class HTMLFormElement extends HTMLElement {
 	 * @param [submitter] Submitter.
 	 */
 	#submit(submitter?: HTMLInputElement | HTMLButtonElement): void {
+		const method = submitter?.formMethod || this.method;
+
+		if (method === 'dialog') {
+			let dialog: HTMLDialogElement | null = null;
+			let parent: Element | null = this;
+
+			while (parent) {
+				if (parent[PropertySymbol.tagName] === 'DIALOG') {
+					dialog = <HTMLDialogElement>parent;
+					break;
+				}
+				parent = parent.parentElement;
+			}
+
+			if (dialog) {
+				dialog.close(submitter?.value);
+				return;
+			}
+		}
+
 		const action = submitter?.hasAttribute('formaction')
 			? submitter?.formAction || this.action
 			: this.action;
@@ -563,7 +614,6 @@ export default class HTMLFormElement extends HTMLElement {
 			return;
 		}
 
-		const method = submitter?.formMethod || this.method;
 		const formData = new this[PropertySymbol.window].FormData(this);
 		let targetFrame: IBrowserFrame;
 
@@ -587,6 +637,7 @@ export default class HTMLFormElement extends HTMLElement {
 
 		if (method === 'get') {
 			const url = new URL(action);
+			url.search = '';
 
 			for (const [key, value] of formData) {
 				if (typeof value === 'string') {
@@ -596,7 +647,7 @@ export default class HTMLFormElement extends HTMLElement {
 
 			BrowserFrameNavigator.navigate({
 				windowClass: <typeof BrowserWindow>(
-					this[PropertySymbol.ownerDocument][PropertySymbol.defaultView].constructor
+					this[PropertySymbol.ownerDocument][PropertySymbol.defaultView]?.constructor
 				),
 				frame: targetFrame,
 				url: url.href,
@@ -610,7 +661,7 @@ export default class HTMLFormElement extends HTMLElement {
 
 		BrowserFrameNavigator.navigate({
 			windowClass: <typeof BrowserWindow>(
-				this[PropertySymbol.ownerDocument][PropertySymbol.defaultView].constructor
+				this[PropertySymbol.ownerDocument][PropertySymbol.defaultView]?.constructor
 			),
 			frame: targetFrame,
 			method: method,

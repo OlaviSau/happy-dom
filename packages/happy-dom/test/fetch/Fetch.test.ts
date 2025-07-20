@@ -109,7 +109,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					`Failed to construct 'Request': Invalid URL "${url}" on document location 'about:blank'. Relative URLs are not permitted on current document location.`,
 					DOMExceptionNameEnum.notSupportedError
 				)
@@ -128,7 +128,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					`Failed to construct 'Request': Invalid URL "${url}" on document location 'about:blank'. Relative URLs are not permitted on current document location.`,
 					DOMExceptionNameEnum.notSupportedError
 				)
@@ -585,6 +585,38 @@ describe('Fetch', () => {
 			]);
 		});
 
+		it('Disables validation of certificates if "Browser.settings.fetch.disableStrictSSL" is set to "true".', async () => {
+			const originURL = 'https://localhost:8080';
+			const window = new Window({ url: originURL });
+			const url = 'https://localhost:8080/some/path';
+
+			window.happyDOM.settings.fetch.disableStrictSSL = true;
+
+			const network = mockNetwork('https');
+
+			await window.fetch(url);
+
+			expect(network.requestHistory).toEqual([
+				{
+					url,
+					options: {
+						agent: false,
+						key: FetchHTTPSCertificate.key,
+						cert: FetchHTTPSCertificate.cert,
+						method: 'GET',
+						rejectUnauthorized: false,
+						headers: {
+							Accept: '*/*',
+							Connection: 'close',
+							'User-Agent': window.navigator.userAgent,
+							'Accept-Encoding': 'gzip, deflate, br',
+							Referer: originURL + '/'
+						}
+					}
+				}
+			]);
+		});
+
 		for (const httpCode of [301, 302, 303, 307, 308]) {
 			for (const method of ['GET', 'POST', 'PATCH']) {
 				it(`Should follow ${method} request redirect code ${httpCode}.`, async () => {
@@ -770,7 +802,10 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(`Maximum redirects reached at: ${url1}`, DOMExceptionNameEnum.networkError)
+				new window.DOMException(
+					`Maximum redirects reached at: ${url1}`,
+					DOMExceptionNameEnum.networkError
+				)
 			);
 
 			// One more as the request is completed before it reaches the 20th try.
@@ -867,7 +902,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					`URI requested responds with a redirect, redirect mode is set to "error": ${url}`,
 					DOMExceptionNameEnum.abortError
 				)
@@ -894,7 +929,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					`URI requested responds with an invalid redirect URL: ${redirectURL}`,
 					DOMExceptionNameEnum.uriMismatchError
 				)
@@ -1071,7 +1106,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					`Mixed Content: The page at '${originURL}' was loaded over HTTPS, but requested an insecure XMLHttpRequest endpoint '${url}'. This request has been blocked; the content must be served over HTTPS.`,
 					DOMExceptionNameEnum.securityError
 				)
@@ -1412,7 +1447,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					`Failed to execute "fetch()" on "Window" with URL "${url}": connect ECONNREFUSED ::1:8080`,
 					DOMExceptionNameEnum.networkError
 				)
@@ -1562,7 +1597,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException('Premature close.', DOMExceptionNameEnum.networkError)
+				new window.DOMException('Premature close.', DOMExceptionNameEnum.networkError)
 			);
 		});
 
@@ -1619,7 +1654,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					'Failed to read response body. Error: Error.',
 					DOMExceptionNameEnum.encodingError
 				)
@@ -2052,7 +2087,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					'Failed to read response body. Error: incorrect header check.',
 					DOMExceptionNameEnum.encodingError
 				)
@@ -2089,7 +2124,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException('signal is aborted without reason', DOMExceptionNameEnum.abortError)
+				new window.DOMException('signal is aborted without reason', DOMExceptionNameEnum.abortError)
 			);
 		});
 
@@ -2212,7 +2247,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException('signal is aborted without reason', DOMExceptionNameEnum.abortError)
+				new window.DOMException('signal is aborted without reason', DOMExceptionNameEnum.abortError)
 			);
 		});
 		it('Supports aborting multiple ongoing requests using AbortController.', async () => {
@@ -2259,10 +2294,16 @@ describe('Fetch', () => {
 				const onFetchCatch = (): void => {
 					if (error1 && error2) {
 						expect(error1).toEqual(
-							new DOMException('signal is aborted without reason', DOMExceptionNameEnum.abortError)
+							new window.DOMException(
+								'signal is aborted without reason',
+								DOMExceptionNameEnum.abortError
+							)
 						);
 						expect(error2).toEqual(
-							new DOMException('signal is aborted without reason', DOMExceptionNameEnum.abortError)
+							new window.DOMException(
+								'signal is aborted without reason',
+								DOMExceptionNameEnum.abortError
+							)
 						);
 						resolve(null);
 					}
@@ -2296,7 +2337,7 @@ describe('Fetch', () => {
 				error = e;
 			}
 			expect(error).toEqual(
-				new DOMException('signal is aborted without reason', DOMExceptionNameEnum.abortError)
+				new window.DOMException('signal is aborted without reason', DOMExceptionNameEnum.abortError)
 			);
 		});
 
@@ -2344,7 +2385,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					'The operation was aborted. AbortError: signal is aborted without reason',
 					DOMExceptionNameEnum.abortError
 				)
@@ -2410,7 +2451,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					'The operation was aborted. AbortError: signal is aborted without reason',
 					DOMExceptionNameEnum.abortError
 				)
@@ -2483,7 +2524,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException('signal is aborted without reason', DOMExceptionNameEnum.abortError)
+				new window.DOMException('signal is aborted without reason', DOMExceptionNameEnum.abortError)
 			);
 		});
 
@@ -3264,7 +3305,7 @@ describe('Fetch', () => {
 			}
 
 			expect(error).toEqual(
-				new DOMException(
+				new window.DOMException(
 					`Failed to execute "fetch()" on "Window" with URL "https://localhost:8080/test/": test`,
 					DOMExceptionNameEnum.networkError
 				)
@@ -3339,7 +3380,7 @@ describe('Fetch', () => {
 						'Accept-Encoding': 'gzip, deflate, br',
 						'Content-Type':
 							'multipart/form-data; boundary=----HappyDOMFormDataBoundary0.ssssssssst',
-						'Content-Length': '198'
+						'Content-Length': '244'
 					},
 					agent: false,
 					rejectUnauthorized: true,
@@ -3349,7 +3390,7 @@ describe('Fetch', () => {
 			});
 			expect(destroyCount).toBe(1);
 			expect(writtenBodyData).toBe(
-				'------HappyDOMFormDataBoundary0.ssssssssst\r\nContent-Disposition: form-data; name="key1"\r\n\r\nvalue1\r\n------HappyDOMFormDataBoundary0.ssssssssst\r\nContent-Disposition: form-data; name="key2"\r\n\r\nvalue2\r\n'
+				'------HappyDOMFormDataBoundary0.ssssssssst\r\nContent-Disposition: form-data; name="key1"\r\n\r\nvalue1\r\n------HappyDOMFormDataBoundary0.ssssssssst\r\nContent-Disposition: form-data; name="key2"\r\n\r\nvalue2\r\n------HappyDOMFormDataBoundary0.ssssssssst--\r\n'
 			);
 			expect(response.status).toBe(200);
 		});
@@ -3627,7 +3668,7 @@ describe('Fetch', () => {
 										'content-length',
 										String(responseText.length),
 										'cache-control',
-										'max-age=0.001',
+										'max-age=0.0001',
 										'last-modified',
 										'Mon, 11 Dec 2023 01:00:00 GMT'
 									];
@@ -3672,7 +3713,7 @@ describe('Fetch', () => {
 			expect(headers1).toEqual({
 				'content-type': 'text/html',
 				'content-length': String(responseText.length),
-				'cache-control': `max-age=0.001`,
+				'cache-control': `max-age=0.0001`,
 				'last-modified': 'Mon, 11 Dec 2023 01:00:00 GMT'
 			});
 
@@ -3786,7 +3827,7 @@ describe('Fetch', () => {
 										'content-length',
 										String(responseText1.length),
 										'cache-control',
-										'max-age=0.001',
+										'max-age=0.0001',
 										'last-modified',
 										'Mon, 11 Dec 2023 01:00:00 GMT'
 									];
@@ -3839,7 +3880,7 @@ describe('Fetch', () => {
 			expect(headers1).toEqual({
 				'content-type': 'text/html',
 				'content-length': String(responseText1.length),
-				'cache-control': `max-age=0.001`,
+				'cache-control': `max-age=0.0001`,
 				'last-modified': 'Mon, 11 Dec 2023 01:00:00 GMT'
 			});
 
@@ -3954,7 +3995,7 @@ describe('Fetch', () => {
 										'content-length',
 										String(responseText.length),
 										'cache-control',
-										'max-age=0.001',
+										'max-age=0.0001',
 										'last-modified',
 										'Mon, 11 Dec 2023 01:00:00 GMT',
 										'etag',
@@ -4004,7 +4045,7 @@ describe('Fetch', () => {
 			expect(headers1).toEqual({
 				'content-type': 'text/html',
 				'content-length': String(responseText.length),
-				'cache-control': `max-age=0.001`,
+				'cache-control': `max-age=0.0001`,
 				'last-modified': 'Mon, 11 Dec 2023 01:00:00 GMT',
 				etag: etag1
 			});
@@ -4018,7 +4059,7 @@ describe('Fetch', () => {
 			expect(headers2).toEqual({
 				'content-type': 'text/html',
 				'content-length': String(responseText.length),
-				'cache-control': `max-age=0.001`,
+				'cache-control': `max-age=0.0001`,
 				'Last-Modified': 'Mon, 11 Dec 2023 02:00:00 GMT',
 				ETag: etag2
 			});
@@ -4124,7 +4165,7 @@ describe('Fetch', () => {
 										'content-length',
 										String(responseText1.length),
 										'cache-control',
-										'max-age=0.001',
+										'max-age=0.0001',
 										'last-modified',
 										'Mon, 11 Dec 2023 01:00:00 GMT',
 										'etag',
@@ -4171,7 +4212,7 @@ describe('Fetch', () => {
 			expect(headers1).toEqual({
 				'content-type': 'text/html',
 				'content-length': String(responseText1.length),
-				'cache-control': `max-age=0.001`,
+				'cache-control': `max-age=0.0001`,
 				'last-modified': 'Mon, 11 Dec 2023 01:00:00 GMT',
 				etag: etag1
 			});

@@ -2,7 +2,6 @@ import CSSStyleSheet from '../../css/CSSStyleSheet.js';
 import * as PropertySymbol from '../../PropertySymbol.js';
 import HTMLElement from '../html-element/HTMLElement.js';
 import Event from '../../event/Event.js';
-import ErrorEvent from '../../event/events/ErrorEvent.js';
 import DOMTokenList from '../../dom/DOMTokenList.js';
 import Attr from '../attr/Attr.js';
 import DOMExceptionNameEnum from '../../exception/DOMExceptionNameEnum.js';
@@ -13,6 +12,7 @@ import BrowserErrorCaptureEnum from '../../browser/enums/BrowserErrorCaptureEnum
 import ModuleFactory from '../../module/ModuleFactory.js';
 import PreloadUtility from '../../fetch/preload/PreloadUtility.js';
 import PreloadEntry from '../../fetch/preload/PreloadEntry.js';
+import ElementEventAttributeUtility from '../element/ElementEventAttributeUtility.js';
 
 /**
  * HTML Link Element.
@@ -21,20 +21,38 @@ import PreloadEntry from '../../fetch/preload/PreloadEntry.js';
  * https://developer.mozilla.org/en-US/docs/Web/API/HTMLLinkElement.
  */
 export default class HTMLLinkElement extends HTMLElement {
-	// Events
-	public onerror: (event: ErrorEvent) => void = null;
-	public onload: (event: Event) => void = null;
-
 	// Internal properties
-	public [PropertySymbol.sheet]: CSSStyleSheet = null;
+	public [PropertySymbol.sheet]: CSSStyleSheet | null = null;
 	public [PropertySymbol.evaluateCSS] = true;
 	public [PropertySymbol.relList]: DOMTokenList | null = null;
 	#loadedStyleSheetURL: string | null = null;
 
+	// Events
+
+	/* eslint-disable jsdoc/require-jsdoc */
+
+	public get onerror(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onerror');
+	}
+
+	public set onerror(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onerror', value);
+	}
+
+	public get onload(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onload');
+	}
+
+	public set onload(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onload', value);
+	}
+
+	/* eslint-enable jsdoc/require-jsdoc */
+
 	/**
 	 * Returns sheet.
 	 */
-	public get sheet(): CSSStyleSheet {
+	public get sheet(): CSSStyleSheet | null {
 		return this[PropertySymbol.sheet];
 	}
 
@@ -111,10 +129,10 @@ export default class HTMLLinkElement extends HTMLElement {
 		}
 
 		try {
-			return new URL(this.getAttribute('href'), this[PropertySymbol.ownerDocument].location.href)
+			return new URL(this.getAttribute('href')!, this[PropertySymbol.ownerDocument].location.href)
 				.href;
 		} catch (e) {
-			return this.getAttribute('href');
+			return this.getAttribute('href')!;
 		}
 	}
 
@@ -282,6 +300,7 @@ export default class HTMLLinkElement extends HTMLElement {
 		const browserSettings = new WindowBrowserContext(window).getSettings();
 
 		if (
+			!browserFrame ||
 			!browserSettings ||
 			!this[PropertySymbol.isConnected] ||
 			browserSettings.disableJavaScriptFileLoading ||
@@ -301,8 +320,8 @@ export default class HTMLLinkElement extends HTMLElement {
 				const module = await ModuleFactory.getModule(window, absoluteURL, url);
 				await module.preload();
 			} catch (error) {
-				browserFrame.page?.console.error(error);
-				window[PropertySymbol.dispatchError](error);
+				browserFrame.page.console.error(error);
+				window[PropertySymbol.dispatchError](<Error>error);
 				return;
 			}
 		}
@@ -316,7 +335,6 @@ export default class HTMLLinkElement extends HTMLElement {
 	async #preloadResource(url: string): Promise<void> {
 		const window = this[PropertySymbol.window];
 		const browserFrame = new WindowBrowserContext(window).getBrowserFrame();
-		const browserSettings = browserFrame.page?.context?.browser?.settings;
 		const as = this.as;
 
 		// Only "script", "style" and "fetch" are supported for now.
@@ -327,6 +345,8 @@ export default class HTMLLinkElement extends HTMLElement {
 		) {
 			return;
 		}
+
+		const browserSettings = browserFrame.page.context.browser.settings;
 
 		if (
 			as === 'script' &&
@@ -376,11 +396,11 @@ export default class HTMLLinkElement extends HTMLElement {
 
 			preloadEntry.responseAvailable(null, response);
 		} catch (error) {
-			preloadEntry.responseAvailable(error, null);
+			preloadEntry.responseAvailable(<Error>error, null);
 			window.document[PropertySymbol.preloads].delete(preloadKey);
 
-			browserFrame.page?.console?.error(
-				`Failed to preload resource "${absoluteURL}": ${error.message}`
+			browserFrame.page.console.error(
+				`Failed to preload resource "${absoluteURL}": ${(<Error>error).message}`
 			);
 		}
 	}
@@ -395,11 +415,11 @@ export default class HTMLLinkElement extends HTMLElement {
 		const window = this[PropertySymbol.window];
 		const browserFrame = new WindowBrowserContext(window).getBrowserFrame();
 
-		if (!browserFrame) {
+		if (!browserFrame || url === null) {
 			return;
 		}
 
-		const browserSettings = browserFrame.page?.context?.browser?.settings;
+		const browserSettings = browserFrame.page.context.browser.settings;
 
 		if (!this[PropertySymbol.evaluateCSS] || !this[PropertySymbol.isConnected]) {
 			return;
@@ -425,7 +445,7 @@ export default class HTMLLinkElement extends HTMLElement {
 					DOMExceptionNameEnum.notSupportedError
 				);
 
-				browserFrame.page?.console.error(error);
+				browserFrame.page.console.error(error);
 				this.dispatchEvent(new Event('error'));
 			}
 			return;
@@ -446,19 +466,19 @@ export default class HTMLLinkElement extends HTMLElement {
 				credentials: this.crossOrigin === 'use-credentials' ? 'include' : 'same-origin'
 			});
 		} catch (e) {
-			error = e;
+			error = <Error>e;
 		}
 
 		readyStateManager.endTask();
 
 		if (error) {
-			browserFrame.page?.console.error(error);
+			browserFrame.page.console.error(error);
 			this.dispatchEvent(new Event('error'));
 		} else {
 			const styleSheet = new this[PropertySymbol.ownerDocument][
 				PropertySymbol.window
 			].CSSStyleSheet();
-			styleSheet.replaceSync(code);
+			styleSheet.replaceSync(code!);
 			this[PropertySymbol.sheet] = styleSheet;
 
 			// Computed style cache is affected by all mutations.

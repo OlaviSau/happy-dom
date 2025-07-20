@@ -25,11 +25,11 @@ export default class DOMStringMap {
 		// Documentation for Proxy:
 		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
 		return new Proxy(this, {
-			get(_target, property: string): string {
+			get(_target, property: string): string | void {
 				const attribute = element.getAttribute(
 					'data-' + DOMStringMapUtility.camelCaseToKebab(property)
 				);
-				if (attribute) {
+				if (attribute !== null) {
 					return attribute;
 				}
 			},
@@ -49,10 +49,10 @@ export default class DOMStringMap {
 				for (const items of element[PropertySymbol.attributes][
 					PropertySymbol.itemsByName
 				].values()) {
-					if (items[0][PropertySymbol.name].startsWith('data-')) {
+					if (items[0][PropertySymbol.name]!.startsWith('data-')) {
 						keys.push(
 							DOMStringMapUtility.kebabToCamelCase(
-								items[0][PropertySymbol.name].replace('data-', '')
+								items[0][PropertySymbol.name]!.replace('data-', '')
 							)
 						);
 					}
@@ -74,7 +74,7 @@ export default class DOMStringMap {
 
 				return true;
 			},
-			getOwnPropertyDescriptor(_target, property: string): PropertyDescriptor {
+			getOwnPropertyDescriptor(_target, property: string): PropertyDescriptor | undefined {
 				const attribute = element.getAttribute(
 					'data-' + DOMStringMapUtility.camelCaseToKebab(property)
 				);

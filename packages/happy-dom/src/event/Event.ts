@@ -12,10 +12,15 @@ import Document from '../nodes/document/Document.js';
  * Event.
  */
 export default class Event {
-	public NONE = EventPhaseEnum.none;
-	public CAPTURING_PHASE = EventPhaseEnum.capturing;
-	public AT_TARGET = EventPhaseEnum.atTarget;
-	public BUBBLING_PHASE = EventPhaseEnum.bubbling;
+	public static NONE = EventPhaseEnum.none;
+	public static CAPTURING_PHASE = EventPhaseEnum.capturing;
+	public static AT_TARGET = EventPhaseEnum.atTarget;
+	public static BUBBLING_PHASE = EventPhaseEnum.bubbling;
+
+	public NONE = Event.NONE;
+	public CAPTURING_PHASE = Event.CAPTURING_PHASE;
+	public AT_TARGET = Event.AT_TARGET;
+	public BUBBLING_PHASE = Event.BUBBLING_PHASE;
 
 	public [PropertySymbol.composed] = false;
 	public [PropertySymbol.bubbles] = false;
@@ -28,8 +33,8 @@ export default class Event {
 	public [PropertySymbol.dispatching] = false;
 	public [PropertySymbol.immediatePropagationStopped] = false;
 	public [PropertySymbol.propagationStopped] = false;
-	public [PropertySymbol.target]: EventTarget = null;
-	public [PropertySymbol.currentTarget]: EventTarget = null;
+	public [PropertySymbol.target]: EventTarget | null = null;
+	public [PropertySymbol.currentTarget]: EventTarget | null = null;
 	public [PropertySymbol.isInPassiveEventListener] = false;
 
 	/**
@@ -114,7 +119,7 @@ export default class Event {
 	 * @returns Target.
 	 */
 	public get target(): EventTarget {
-		return this[PropertySymbol.target];
+		return this[PropertySymbol.target]!;
 	}
 
 	/**
@@ -123,7 +128,7 @@ export default class Event {
 	 * @returns Target.
 	 */
 	public get currentTarget(): EventTarget {
-		return this[PropertySymbol.currentTarget];
+		return this[PropertySymbol.currentTarget]!;
 	}
 
 	/**
@@ -146,15 +151,15 @@ export default class Event {
 		}
 
 		const composedPath = [];
-		let eventTarget: Node | ShadowRoot | BrowserWindow = <Node | ShadowRoot>(
-			(<unknown>this[PropertySymbol.target])
+		let eventTarget: Node | ShadowRoot | BrowserWindow | null = <Node | ShadowRoot>(
+			this[PropertySymbol.target]
 		);
 
 		while (eventTarget) {
 			composedPath.push(eventTarget);
 
 			if ((<Node>(<unknown>eventTarget)).parentNode) {
-				eventTarget = (<Node>(<unknown>eventTarget)).parentNode;
+				eventTarget = (<Node>(<unknown>eventTarget)).parentNode!;
 			} else if (
 				this[PropertySymbol.composed] &&
 				(<Node>eventTarget)[PropertySymbol.nodeType] === NodeTypeEnum.documentFragmentNode &&

@@ -41,7 +41,36 @@ describe('Element', () => {
 		vi.restoreAllMocks();
 	});
 
-	describe('children', () => {
+	for (const event of [
+		'fullscreenerror',
+		'fullscreenchange',
+		'beforecopy',
+		'beforecut',
+		'beforepaste',
+		'search'
+	]) {
+		describe(`get on${event}()`, () => {
+			it('Returns the event listener.', () => {
+				element.setAttribute(`on${event}`, 'window.test = 1');
+				expect(element[`on${event}`]).toBeTypeOf('function');
+				element[`on${event}`](new Event(event));
+				expect(window['test']).toBe(1);
+			});
+		});
+
+		describe(`set on${event}()`, () => {
+			it('Sets the event listener.', () => {
+				element[`on${event}`] = () => {
+					window['test'] = 1;
+				};
+				element.dispatchEvent(new Event(event));
+				expect(element.getAttribute(`on${event}`)).toBe(null);
+				expect(window['test']).toBe(1);
+			});
+		});
+	}
+
+	describe('get children()', () => {
 		it('Returns nodes of type Element.', () => {
 			const div1 = document.createElement('div');
 			const div2 = document.createElement('div');
@@ -124,10 +153,16 @@ describe('Element', () => {
 			expect(window['element2']).toBe(undefined);
 		});
 
-		it(`Doesn't the "id" attribute as a property to Window if it collides with Window properties.`, () => {
+		it(`Doesn't add the "id" attribute as a property to Window if it collides with Window properties.`, () => {
 			element.setAttribute('id', 'document');
 			document.body.appendChild(element);
 			expect(window['document']).toBe(document);
+		});
+
+		it(`Doesn't add the "opener" attribute as a property to Window when the property value is null (#1841).`, () => {
+			document.body.appendChild(element);
+			element.id = 'opener';
+			expect(window['opener']).toBe(null);
 		});
 	});
 
@@ -181,6 +216,18 @@ describe('Element', () => {
 			expect(element.classList.length).toBe(2);
 			expect(element.classList[0]).toBe('value1');
 			expect(element.classList[1]).toBe('value2');
+		});
+
+		it('Handles cache correctly (#1812)', () => {
+			element.classList.add('foo', 'bar', 'baz');
+			expect(element.outerHTML).toEqual('<div class="foo bar baz"></div>');
+			element.className = '';
+			element.classList.add('bar', 'baz');
+			expect(element.outerHTML).toEqual('<div class="bar baz"></div>');
+			element.classList.remove('baz');
+			expect(element.outerHTML).toEqual('<div class="bar"></div>');
+			element.classList.replace('bar', 'foo');
+			expect(element.outerHTML).toEqual('<div class="foo"></div>');
 		});
 	});
 
@@ -1677,6 +1724,26 @@ describe('Element', () => {
 			expect(element.getAttribute('data-custom')).toBe('1'); // common custom attribute pattern
 		});
 
+		it('Sets SVG attribute "xmlns:xlink" on an element.', () => {
+			const div = document.createElement('div');
+
+			div.innerHTML =
+				'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><use/></svg>';
+
+			div.children[0].setAttribute('xmlns:xlink', 'test');
+			div.children[0].children[0].setAttribute('xlink:href', '#a');
+
+			expect(div.children[0].getAttributeNode('xmlns:xlink')?.namespaceURI).toBe(
+				NamespaceURI.xmlns
+			);
+			expect(div.children[0].getAttribute('xmlns:xlink')).toBe('test');
+
+			expect(div.children[0].children[0].getAttributeNode('xlink:href')?.namespaceURI).toBe(
+				NamespaceURI.xlink
+			);
+			expect(div.children[0].children[0].getAttribute('xlink:href')).toBe('#a');
+		});
+
 		it('Throws an error when given an invalid character in the attribute name', () => {
 			try {
 				element.setAttribute('☺', '1');
@@ -1771,6 +1838,13 @@ describe('Element', () => {
 			expect(element.attributes['global:local2'].specified).toBe(true);
 			expect(element.attributes['global:local2'].ownerElement === element).toBe(true);
 			expect(element.attributes['global:local2'].ownerDocument === document).toBe(true);
+		});
+	});
+
+	describe('getAttribute()', () => {
+		it('Returns null when cannot find attribute.', () => {
+			element.setAttribute('key2', '');
+			expect(element.getAttribute('random')).toEqual(null);
 		});
 	});
 
@@ -1973,6 +2047,19 @@ describe('Element', () => {
 			expect(clone.children.length).toEqual(0);
 			expect(clone2.children.length).toBe(1);
 			expect(clone2.children[0].outerHTML).toBe('<div class="className"></div>');
+		});
+
+		it('Sets the properties of the cloned element.', () => {
+			const div1 = document.createElement('div');
+			div1.className = 'div1';
+			const cloned = div1.cloneNode(true);
+			cloned.className = 'cloned';
+
+			expect(div1.className).toBe('div1');
+			expect(cloned.className).toBe('cloned');
+
+			expect(div1.outerHTML).toBe('<div class="div1"></div>');
+			expect(cloned.outerHTML).toBe('<div class="cloned"></div>');
 		});
 
 		it('Clones shadow root when it is "clonable".', () => {

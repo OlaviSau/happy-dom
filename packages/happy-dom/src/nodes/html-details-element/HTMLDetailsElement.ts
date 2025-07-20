@@ -4,6 +4,8 @@ import * as PropertySymbol from '../../PropertySymbol.js';
 import Attr from '../attr/Attr.js';
 import EventPhaseEnum from '../../event/EventPhaseEnum.js';
 import MouseEvent from '../../event/events/MouseEvent.js';
+import ElementEventAttributeUtility from '../element/ElementEventAttributeUtility.js';
+import Element from '../element/Element.js';
 
 /**
  * HTMLDetailsElement
@@ -12,7 +14,18 @@ import MouseEvent from '../../event/events/MouseEvent.js';
  */
 export default class HTMLDetailsElement extends HTMLElement {
 	// Events
-	public ontoggle: ((event: Event) => void) | null = null;
+
+	/* eslint-disable jsdoc/require-jsdoc */
+
+	public get ontoggle(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'ontoggle');
+	}
+
+	public set ontoggle(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('ontoggle', value);
+	}
+
+	/* eslint-enable jsdoc/require-jsdoc */
 
 	/**
 	 * Returns the open attribute.
@@ -67,7 +80,7 @@ export default class HTMLDetailsElement extends HTMLElement {
 
 		if (
 			!event[PropertySymbol.defaultPrevented] &&
-			event[PropertySymbol.target]?.[PropertySymbol.localName] === 'summary' &&
+			(<Element | null>event[PropertySymbol.target])?.[PropertySymbol.localName] === 'summary' &&
 			event.type === 'click' &&
 			event.eventPhase === EventPhaseEnum.bubbling &&
 			event instanceof MouseEvent

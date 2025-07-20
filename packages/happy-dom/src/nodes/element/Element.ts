@@ -13,9 +13,6 @@ import DOMRectList from '../../dom/DOMRectList.js';
 import Attr from '../attr/Attr.js';
 import NamedNodeMap from './NamedNodeMap.js';
 import Event from '../../event/Event.js';
-import EventPhaseEnum from '../../event/EventPhaseEnum.js';
-import WindowBrowserContext from '../../window/WindowBrowserContext.js';
-import BrowserErrorCaptureEnum from '../../browser/enums/BrowserErrorCaptureEnum.js';
 import NodeTypeEnum from '../node/NodeTypeEnum.js';
 import IHTMLElementTagNameMap from '../../config/IHTMLElementTagNameMap.js';
 import ISVGElementTagNameMap from '../../config/ISVGElementTagNameMap.js';
@@ -34,6 +31,7 @@ import HTMLParser from '../../html-parser/HTMLParser.js';
 import IScrollToOptions from '../../window/IScrollToOptions.js';
 import { AttributeUtility } from '../../utilities/AttributeUtility.js';
 import DOMExceptionNameEnum from '../../exception/DOMExceptionNameEnum.js';
+import ElementEventAttributeUtility from './ElementEventAttributeUtility.js';
 
 type InsertAdjacentPosition = 'beforebegin' | 'afterbegin' | 'beforeend' | 'afterend';
 
@@ -49,42 +47,6 @@ export default class Element
 	public static [PropertySymbol.namespaceURI]: string | null = null;
 	public declare cloneNode: (deep?: boolean) => Element;
 
-	// Events
-	public oncancel: ((event: Event) => void) | null = null;
-	public onerror: ((event: Event) => void) | null = null;
-	public onscroll: ((event: Event) => void) | null = null;
-	public onselect: ((event: Event) => void) | null = null;
-	public onwheel: ((event: Event) => void) | null = null;
-	public oncopy: ((event: Event) => void) | null = null;
-	public oncut: ((event: Event) => void) | null = null;
-	public onpaste: ((event: Event) => void) | null = null;
-	public oncompositionend: ((event: Event) => void) | null = null;
-	public oncompositionstart: ((event: Event) => void) | null = null;
-	public oncompositionupdate: ((event: Event) => void) | null = null;
-	public onblur: ((event: Event) => void) | null = null;
-	public onfocus: ((event: Event) => void) | null = null;
-	public onfocusin: ((event: Event) => void) | null = null;
-	public onfocusout: ((event: Event) => void) | null = null;
-	public onfullscreenchange: ((event: Event) => void) | null = null;
-	public onfullscreenerror: ((event: Event) => void) | null = null;
-	public onkeydown: ((event: Event) => void) | null = null;
-	public onkeyup: ((event: Event) => void) | null = null;
-	public onauxclick: ((event: Event) => void) | null = null;
-	public onclick: ((event: Event) => void) | null = null;
-	public oncontextmenu: ((event: Event) => void) | null = null;
-	public ondblclick: ((event: Event) => void) | null = null;
-	public onmousedown: ((event: Event) => void) | null = null;
-	public onmouseenter: ((event: Event) => void) | null = null;
-	public onmouseleave: ((event: Event) => void) | null = null;
-	public onmousemove: ((event: Event) => void) | null = null;
-	public onmouseout: ((event: Event) => void) | null = null;
-	public onmouseover: ((event: Event) => void) | null = null;
-	public onmouseup: ((event: Event) => void) | null = null;
-	public ontouchcancel: ((event: Event) => void) | null = null;
-	public ontouchend: ((event: Event) => void) | null = null;
-	public ontouchmove: ((event: Event) => void) | null = null;
-	public ontouchstart: ((event: Event) => void) | null = null;
-
 	// Internal properties
 	public [PropertySymbol.classList]: DOMTokenList | null = null;
 	public [PropertySymbol.isValue]: string | null = null;
@@ -99,6 +61,8 @@ export default class Element
 	public [PropertySymbol.attributesProxy]: NamedNodeMap | null = null;
 	public [PropertySymbol.children]: HTMLCollection<Element> | null = null;
 	public [PropertySymbol.computedStyle]: CSSStyleDeclaration | null = null;
+	public [PropertySymbol.propertyEventListeners]: Map<string, ((event: Event) => void) | null> =
+		new Map();
 	public declare [PropertySymbol.tagName]: string | null;
 	public declare [PropertySymbol.localName]: string | null;
 	public declare [PropertySymbol.namespaceURI]: string | null;
@@ -124,6 +88,60 @@ export default class Element
 			this[PropertySymbol.namespaceURI] = null;
 		}
 	}
+
+	// Events
+
+	/* eslint-disable jsdoc/require-jsdoc */
+
+	public get onfullscreenerror(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onfullscreenerror');
+	}
+
+	public set onfullscreenerror(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onfullscreenerror', value);
+	}
+
+	public get onfullscreenchange(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onfullscreenchange');
+	}
+
+	public set onfullscreenchange(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onfullscreenchange', value);
+	}
+
+	public get onbeforecopy(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onbeforecopy');
+	}
+
+	public set onbeforecopy(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onbeforecopy', value);
+	}
+
+	public get onbeforecut(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onbeforecut');
+	}
+
+	public set onbeforecut(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onbeforecut', value);
+	}
+
+	public get onbeforepaste(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onbeforepaste');
+	}
+
+	public set onbeforepaste(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onbeforepaste', value);
+	}
+
+	public get onsearch(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onsearch');
+	}
+
+	public set onsearch(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onsearch', value);
+	}
+
+	/* eslint-enable jsdoc/require-jsdoc */
 
 	/**
 	 * Returns tag name.
@@ -311,7 +329,7 @@ export default class Element
 	 * @returns Node name.
 	 */
 	public get nodeName(): string {
-		return this[PropertySymbol.tagName];
+		return this[PropertySymbol.tagName]!;
 	}
 
 	/**
@@ -320,7 +338,7 @@ export default class Element
 	 * @returns Local name.
 	 */
 	public get localName(): string {
-		return this[PropertySymbol.localName];
+		return this[PropertySymbol.localName]!;
 	}
 
 	/**
@@ -546,17 +564,11 @@ export default class Element
 			clone[PropertySymbol.shadowRoot][PropertySymbol.host] = clone;
 		}
 
-		clone[PropertySymbol.attributes][PropertySymbol.itemsByNamespaceURI] = new Map(
-			this[PropertySymbol.attributes][PropertySymbol.itemsByNamespaceURI]
-		);
+		clone[PropertySymbol.attributes] = new NamedNodeMap(clone);
 
-		clone[PropertySymbol.attributes][PropertySymbol.itemsByName] = new Map(
-			this[PropertySymbol.attributes][PropertySymbol.itemsByName]
-		);
-
-		clone[PropertySymbol.attributes][PropertySymbol.items] = new Map(
-			this[PropertySymbol.attributes][PropertySymbol.items]
-		);
+		for (const attr of this[PropertySymbol.attributes][PropertySymbol.items].values()) {
+			clone[PropertySymbol.attributes].setNamedItem(attr.cloneNode(deep));
+		}
 
 		return <Element>clone;
 	}
@@ -693,15 +705,43 @@ export default class Element
 			{ method: 'setAttribute', instance: 'Element' }
 		);
 		name = String(name);
+
 		const namespaceURI = this[PropertySymbol.namespaceURI];
-		// TODO: Is it correct to check for namespaceURI === NamespaceURI.svg?
-		const attribute =
-			namespaceURI === NamespaceURI.html &&
-			this[PropertySymbol.ownerDocument][PropertySymbol.contentType] === 'text/html'
-				? this[PropertySymbol.ownerDocument].createAttribute(name)
-				: this[PropertySymbol.ownerDocument].createAttributeNS(null, name);
-		attribute[PropertySymbol.value] = String(value);
-		this[PropertySymbol.attributes].setNamedItem(attribute);
+
+		if (namespaceURI === NamespaceURI.html) {
+			const attribute = this[PropertySymbol.ownerDocument].createAttribute(name);
+			attribute[PropertySymbol.value] = String(value);
+			this[PropertySymbol.attributes][PropertySymbol.setNamedItem](attribute);
+		} else {
+			const nameParts = name.split(':');
+			let attributeNamespaceURI = null;
+
+			// In the XML namespace, the attribute "xmlns" should be set to the "http://www.w3.org/2000/xmlns/" namespace and "xlink" to the "http://www.w3.org/1999/xlink" namespace.
+			switch (nameParts[0]) {
+				case 'xmlns':
+					attributeNamespaceURI =
+						!nameParts[1] || nameParts[1] === 'xlink' ? NamespaceURI.xmlns : null;
+					break;
+				case 'xlink':
+					attributeNamespaceURI = NamespaceURI.xlink;
+					break;
+			}
+
+			const attribute = NodeFactory.createNode(
+				this[PropertySymbol.ownerDocument],
+				this[PropertySymbol.window].Attr
+			);
+
+			attribute[PropertySymbol.namespaceURI] = attributeNamespaceURI;
+			attribute[PropertySymbol.name] = name;
+			attribute[PropertySymbol.localName] =
+				attributeNamespaceURI && nameParts[1] ? nameParts[1] : name;
+			attribute[PropertySymbol.prefix] =
+				attributeNamespaceURI && nameParts[1] ? nameParts[0] : null;
+			attribute[PropertySymbol.value] = String(value);
+
+			this[PropertySymbol.attributes][PropertySymbol.setNamedItem](attribute);
+		}
 	}
 
 	/**
@@ -731,7 +771,7 @@ export default class Element
 	public getAttributeNames(): string[] {
 		const names = [];
 		for (const item of this[PropertySymbol.attributes][PropertySymbol.items].values()) {
-			names.push(item[PropertySymbol.name]);
+			names.push(item[PropertySymbol.name]!);
 		}
 		return names;
 	}
@@ -741,7 +781,7 @@ export default class Element
 	 *
 	 * @param name Name.
 	 */
-	public getAttribute(name: string): string {
+	public getAttribute(name: string): string | null {
 		const attribute = this[PropertySymbol.attributes].getNamedItem(name);
 		if (attribute) {
 			return attribute[PropertySymbol.value];
@@ -779,7 +819,7 @@ export default class Element
 	 * @param namespace Namespace URI.
 	 * @param localName Local name.
 	 */
-	public getAttributeNS(namespace: string | null, localName: string): string {
+	public getAttributeNS(namespace: string | null, localName: string): string | null {
 		const attribute = this.getAttributeNodeNS(namespace, localName);
 		if (attribute) {
 			return attribute[PropertySymbol.value];
@@ -954,9 +994,9 @@ export default class Element
 	 * @param selector Selector.
 	 * @returns Closest matching element.
 	 */
-	public closest(selector: string): Element {
+	public closest(selector: string): Element | null {
 		// eslint-disable-next-line
-		let parent: Element = this;
+		let parent: Element | null = this;
 
 		while (parent) {
 			if (QuerySelector.matches(parent, selector)) {
@@ -985,7 +1025,11 @@ export default class Element
 	 * @param oldValue Old value.
 	 * @param newValue New value.
 	 */
-	public attributeChangedCallback?(name: string, oldValue: string, newValue: string): void;
+	public attributeChangedCallback?(
+		name: string,
+		oldValue: string | null,
+		newValue: string | null
+	): void;
 
 	/**
 	 * Query CSS selector to find matching nodes.
@@ -998,7 +1042,7 @@ export default class Element
 	): NodeList<IHTMLElementTagNameMap[K]>;
 
 	/**
-	 * Query CSS selector to find matching elments.
+	 * Query CSS selector to find matching elements.
 	 *
 	 * @param selector CSS selector.
 	 * @returns Matching elements.
@@ -1008,7 +1052,7 @@ export default class Element
 	): NodeList<ISVGElementTagNameMap[K]>;
 
 	/**
-	 * Query CSS selector to find matching elments.
+	 * Query CSS selector to find matching elements.
 	 *
 	 * @param selector CSS selector.
 	 * @returns Matching elements.
@@ -1016,7 +1060,7 @@ export default class Element
 	public querySelectorAll(selector: string): NodeList<Element>;
 
 	/**
-	 * Query CSS selector to find matching elments.
+	 * Query CSS selector to find matching elements.
 	 *
 	 * @param selector CSS selector.
 	 * @returns Matching elements.
@@ -1305,43 +1349,6 @@ export default class Element
 	/**
 	 * @override
 	 */
-	public override dispatchEvent(event: Event): boolean {
-		const returnValue = super.dispatchEvent(event);
-		const window = this[PropertySymbol.window];
-		const browserSettings = new WindowBrowserContext(window).getSettings();
-
-		if (
-			browserSettings &&
-			!browserSettings.disableJavaScriptEvaluation &&
-			event.eventPhase === EventPhaseEnum.none &&
-			!event[PropertySymbol.immediatePropagationStopped]
-		) {
-			const attribute = this.getAttribute('on' + event.type);
-
-			if (attribute && !event[PropertySymbol.immediatePropagationStopped]) {
-				const code = `//# sourceURL=${window.location.href}\n${attribute}`;
-
-				if (
-					browserSettings.disableErrorCapturing ||
-					browserSettings.errorCapture !== BrowserErrorCaptureEnum.tryAndCatch
-				) {
-					window.eval(code);
-				} else {
-					try {
-						window.eval(code);
-					} catch (error) {
-						window[PropertySymbol.dispatchError](error);
-					}
-				}
-			}
-		}
-
-		return returnValue;
-	}
-
-	/**
-	 * @override
-	 */
 	public override [PropertySymbol.appendChild](node: Node, disableValidations = false): Node {
 		const returnValue = super[PropertySymbol.appendChild](node, disableValidations);
 		this.#onSlotChange(node);
@@ -1382,7 +1389,7 @@ export default class Element
 	 */
 	public [PropertySymbol.onSetAttribute](attribute: Attr, replacedAttribute: Attr | null): void {
 		if (!attribute[PropertySymbol.name]) {
-			return null;
+			return;
 		}
 
 		const oldValue = replacedAttribute ? replacedAttribute[PropertySymbol.value] : null;
@@ -1390,13 +1397,13 @@ export default class Element
 		if (
 			attribute[PropertySymbol.name] === 'slot' &&
 			this[PropertySymbol.parentNode] &&
-			this[PropertySymbol.parentNode][PropertySymbol.shadowRoot]
+			(<Element>this[PropertySymbol.parentNode])[PropertySymbol.shadowRoot]
 		) {
-			const shadowRoot = this[PropertySymbol.parentNode][PropertySymbol.shadowRoot];
+			const shadowRoot = (<Element>this[PropertySymbol.parentNode])[PropertySymbol.shadowRoot];
 
-			if (attribute[PropertySymbol.value] !== oldValue) {
+			if (shadowRoot && attribute[PropertySymbol.value] !== oldValue) {
 				// Previous slot
-				if (oldValue !== null) {
+				if (oldValue !== null && replacedAttribute) {
 					const slot = shadowRoot.querySelector(
 						`slot[name="${replacedAttribute[PropertySymbol.value]}"]`
 					);
@@ -1418,6 +1425,14 @@ export default class Element
 			}
 		}
 
+		if (
+			this[<'constructor'>attribute[PropertySymbol.name]] !== undefined &&
+			attribute[PropertySymbol.name][0] === 'o' &&
+			attribute[PropertySymbol.name][1] === 'n'
+		) {
+			this[PropertySymbol.propertyEventListeners].delete(attribute[PropertySymbol.name]);
+		}
+
 		if (attribute[PropertySymbol.name] === 'id' && this[PropertySymbol.isConnected]) {
 			if (replacedAttribute?.[PropertySymbol.value]) {
 				this.#removeIdentifierFromWindow(replacedAttribute[PropertySymbol.value]);
@@ -1427,8 +1442,8 @@ export default class Element
 
 		this[PropertySymbol.reportMutation](
 			new MutationRecord({
-				target: this,
 				type: MutationTypeEnum.attributes,
+				target: this,
 				attributeName: attribute[PropertySymbol.name],
 				oldValue
 			})
@@ -1444,9 +1459,9 @@ export default class Element
 		if (
 			removedAttribute[PropertySymbol.name] === 'slot' &&
 			this[PropertySymbol.parentNode] &&
-			this[PropertySymbol.parentNode][PropertySymbol.shadowRoot]
+			(<Element>this[PropertySymbol.parentNode])[PropertySymbol.shadowRoot]
 		) {
-			const shadowRoot = this[PropertySymbol.parentNode][PropertySymbol.shadowRoot];
+			const shadowRoot = (<Element>this[PropertySymbol.parentNode])[PropertySymbol.shadowRoot]!;
 			const namedSlot = shadowRoot.querySelector(
 				`slot[name="${removedAttribute[PropertySymbol.value]}"]`
 			);
@@ -1518,7 +1533,7 @@ export default class Element
 	 *
 	 * @param id Identifier.
 	 */
-	#addIdentifierToWindow(id: string): void {
+	#addIdentifierToWindow(id: string | null): void {
 		if (!id) {
 			return;
 		}
@@ -1537,6 +1552,10 @@ export default class Element
 
 		const entry = document[PropertySymbol.elementIdMap].get(id);
 
+		if (!entry) {
+			return;
+		}
+
 		// HTMLFormElement and HTMLSelectElement can be a proxy, but the scope can be the target and not the actual proxy
 		// To make sure we use the proxy we can check for the proxy property
 		const element = this[PropertySymbol.proxy] || this;
@@ -1551,11 +1570,14 @@ export default class Element
 				);
 			}
 
-			if (!(id in window) || window[id] === entry.elements[0]) {
-				window[id] = entry.htmlCollection;
+			if (!(id in window) || (<any>window)[id] === entry.elements[0]) {
+				(<any>window)[id] = entry.htmlCollection;
 			}
-		} else if (!(id in window) || window[id] === entry.htmlCollection) {
-			window[id] = element;
+		} else if (
+			!(id in window) ||
+			(entry.htmlCollection !== null && (<any>window)[id] === entry.htmlCollection)
+		) {
+			(<any>window)[id] = element;
 		}
 	}
 
@@ -1564,7 +1586,7 @@ export default class Element
 	 *
 	 * @param id Identifier.
 	 */
-	#removeIdentifierFromWindow(id: string): void {
+	#removeIdentifierFromWindow(id: string | null): void {
 		if (!id) {
 			return;
 		}
@@ -1579,28 +1601,30 @@ export default class Element
 
 		const entry = document[PropertySymbol.elementIdMap].get(id);
 
-		if (entry) {
-			// HTMLFormElement and HTMLSelectElement can be a proxy, but the scope can be the target and not the actual proxy
-			// To make sure we use the proxy we can check for the proxy property
-			const element = this[PropertySymbol.proxy] || this;
-			const index = entry.elements.indexOf(element);
+		if (!entry) {
+			return;
+		}
 
-			if (index !== -1) {
-				entry.elements.splice(index, 1);
+		// HTMLFormElement and HTMLSelectElement can be a proxy, but the scope can be the target and not the actual proxy
+		// To make sure we use the proxy we can check for the proxy property
+		const element = this[PropertySymbol.proxy] || this;
+		const index = entry.elements.indexOf(element);
+
+		if (index !== -1) {
+			entry.elements.splice(index, 1);
+		}
+
+		if (entry.elements.length === 1) {
+			if ((<any>window)[id] === entry.htmlCollection) {
+				(<any>window)[id] = entry.elements[0];
 			}
 
-			if (entry.elements.length === 1) {
-				if (window[id] === entry.htmlCollection) {
-					window[id] = entry.elements[0];
-				}
+			entry.htmlCollection = null;
+		} else if (!entry.elements.length) {
+			document[PropertySymbol.elementIdMap].delete(id);
 
-				entry.htmlCollection = null;
-			} else if (!entry.elements.length) {
-				document[PropertySymbol.elementIdMap].delete(id);
-
-				if (window[id] === element || window[id] === entry.htmlCollection) {
-					delete window[id];
-				}
+			if ((<any>window)[id] === element || (<any>window)[id] === entry.htmlCollection) {
+				delete (<any>window)[id];
 			}
 		}
 	}
@@ -1617,7 +1641,7 @@ export default class Element
 			return;
 		}
 
-		const slotName = addedOrRemovedNode['getAttribute']
+		const slotName = (<Element>addedOrRemovedNode)['getAttribute']
 			? (<Element>addedOrRemovedNode).getAttribute('slot')
 			: null;
 		if (slotName) {

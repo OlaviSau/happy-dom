@@ -36,7 +36,10 @@ class NodeList<T extends Node> {
 				}
 				if (property in target || typeof property === 'symbol') {
 					methodBinder.bind(property);
-					return target[property];
+					return (<any>target)[property];
+				}
+				if (property === '') {
+					return undefined;
 				}
 				const index = Number(property);
 				if (!isNaN(index)) {
@@ -47,24 +50,24 @@ class NodeList<T extends Node> {
 				methodBinder.bind(property);
 
 				if (typeof property === 'symbol') {
-					target[property] = newValue;
+					(<any>target)[property] = newValue;
 					return true;
 				}
 
 				const index = Number(property);
 				if (isNaN(index)) {
-					target[property] = newValue;
+					(<any>target)[property] = newValue;
 				}
 				return true;
 			},
 			deleteProperty(target, property): boolean {
 				if (typeof property === 'symbol') {
-					delete target[property];
+					delete (<any>target)[property];
 					return true;
 				}
 				const index = Number(property);
 				if (isNaN(index)) {
-					delete target[property];
+					delete (<any>target)[property];
 				}
 				return true;
 			},
@@ -93,7 +96,7 @@ class NodeList<T extends Node> {
 
 				return false;
 			},
-			getOwnPropertyDescriptor(target, property): PropertyDescriptor {
+			getOwnPropertyDescriptor(target, property): PropertyDescriptor | undefined {
 				if (property in target || typeof property === 'symbol') {
 					return;
 				}
@@ -155,7 +158,7 @@ class NodeList<T extends Node> {
 	 *
 	 * @param index Index.
 	 */
-	public item(index: number): T {
+	public item(index: number): T | null {
 		const nodes = this[PropertySymbol.items];
 		return index >= 0 && nodes[index] ? <T>nodes[index] : null;
 	}
@@ -194,7 +197,10 @@ class NodeList<T extends Node> {
 	 * @param callback Function.
 	 * @param thisArg thisArg.
 	 */
-	public forEach(callback: (currentValue, currentIndex, listObj) => void, thisArg?: this): void {
+	public forEach(
+		callback: (currentValue: T, currentIndex: number, listObj: T[]) => void,
+		thisArg?: this
+	): void {
 		return (<T[]>this[PropertySymbol.items]).forEach(callback, thisArg);
 	}
 

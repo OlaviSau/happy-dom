@@ -5,6 +5,7 @@ import Node from '../nodes/node/Node.js';
 import BrowserWindow from '../window/BrowserWindow.js';
 import XMLDocument from '../nodes/xml-document/XMLDocument.js';
 import XMLEncodeUtility from '../utilities/XMLEncodeUtility.js';
+import NodeFactory from '../nodes/NodeFactory.js';
 
 /**
  * Markup RegExp.
@@ -91,9 +92,9 @@ export default class XMLParser {
 	private window: BrowserWindow;
 	private rootNode: XMLDocument | null = null;
 	private nodeStack: Node[] = [];
-	private tagNameStack: string[] = [];
-	private defaultNamespaceStack: string[] | null = null;
-	private namespacePrefixStack: Array<Map<string, string>> | null = null;
+	private tagNameStack: Array<string | null> = [];
+	private defaultNamespaceStack: Array<string | null> | null = null;
+	private namespacePrefixStack: Array<Map<string, string> | null> | null = null;
 	private startTagIndex = 0;
 	private markupRegExp: RegExp | null = null;
 	private lastIndex = 0;
@@ -134,7 +135,7 @@ export default class XMLParser {
 		this.errorMessage = null;
 		this.markupRegExp = new RegExp(MARKUP_REGEXP, 'gm');
 		this.lastIndex = 0;
-		let match: RegExpExecArray;
+		let match: RegExpExecArray | null;
 
 		this.rootNode[PropertySymbol.defaultView] = this.window;
 
@@ -288,8 +289,8 @@ export default class XMLParser {
 			this.errorIndex = this.lastIndex + text.indexOf('&nbsp;') + 6;
 			this.readState = MarkupReadStateEnum.error;
 		} else {
-			this.currentNode[PropertySymbol.appendChild](
-				this.rootNode.createTextNode(XMLEncodeUtility.decodeXMLEntities(text)),
+			this.currentNode![PropertySymbol.appendChild](
+				this.rootNode!.createTextNode(XMLEncodeUtility.decodeXMLEntities(text)),
 				true
 			);
 		}
@@ -301,26 +302,27 @@ export default class XMLParser {
 	 * @param text Text.
 	 */
 	private parseProcessingInstruction(text: string): void {
+		const markupRegExp = this.markupRegExp!;
 		const parts = text.split(SPACE_REGEXP);
 		const endsWithQuestionMark = text[text.length - 1] === '?';
 
 		if (parts[0] === 'xml') {
 			if (
 				this.currentNode !== this.rootNode ||
-				this.rootNode[PropertySymbol.nodeArray].length !== 0 ||
+				this.rootNode![PropertySymbol.nodeArray].length !== 0 ||
 				parts.length === 1
 			) {
 				this.errorMessage = 'XML declaration allowed only at the start of the document\n';
-				this.errorIndex = this.markupRegExp.lastIndex - text.length + 2;
+				this.errorIndex = markupRegExp.lastIndex - text.length + 2;
 				this.readState = MarkupReadStateEnum.error;
 				this.removeOverflowingTextNodes();
 			} else if (!XML_PROCESSING_INSTRUCTION_VERSION_REGEXP.test(parts[1])) {
 				this.errorMessage = 'Malformed declaration expecting version\n';
-				this.errorIndex = this.markupRegExp.lastIndex - text.length + 3;
+				this.errorIndex = markupRegExp.lastIndex - text.length + 3;
 				this.readState = MarkupReadStateEnum.error;
 			} else if (!endsWithQuestionMark) {
 				this.errorMessage = 'Blank needed here\n';
-				this.errorIndex = this.markupRegExp.lastIndex - 1;
+				this.errorIndex = markupRegExp.lastIndex - 1;
 				this.readState = MarkupReadStateEnum.error;
 			} else {
 				// When the processing instruction has "xml" as target, we should not add it as a child node.
@@ -329,25 +331,25 @@ export default class XMLParser {
 				const name = parts[0];
 				// We need to remove the ending "?".
 				const content = parts.slice(1).join(' ').slice(0, -1);
-				this.rootNode[PropertySymbol.xmlProcessingInstruction] =
-					this.rootNode.createProcessingInstruction(name, content);
+				this.rootNode![PropertySymbol.xmlProcessingInstruction] =
+					this.rootNode!.createProcessingInstruction(name, content);
 				this.readState = MarkupReadStateEnum.any;
 			}
 		} else {
 			if (parts.length === 1 && !endsWithQuestionMark) {
 				this.errorMessage = 'ParsePI: PI processing-instruction space expected\n';
-				this.errorIndex = this.markupRegExp.lastIndex - 1;
+				this.errorIndex = markupRegExp.lastIndex - 1;
 				this.readState = MarkupReadStateEnum.error;
 			} else if (parts.length > 1 && !endsWithQuestionMark) {
 				this.errorMessage = 'ParsePI: PI processing-instruction never end ...\n';
-				this.errorIndex = this.markupRegExp.lastIndex - 1;
+				this.errorIndex = markupRegExp.lastIndex - 1;
 				this.readState = MarkupReadStateEnum.error;
 			} else {
 				const name = parts[0];
 				// We need to remove the ending "?".
 				const content = parts.slice(1).join(' ').slice(0, -1);
-				this.currentNode[PropertySymbol.appendChild](
-					this.rootNode.createProcessingInstruction(name, content),
+				this.currentNode![PropertySymbol.appendChild](
+					this.rootNode!.createProcessingInstruction(name, content),
 					true
 				);
 				this.readState = MarkupReadStateEnum.any;
@@ -363,8 +365,8 @@ export default class XMLParser {
 	private parseComment(comment: string): void {
 		// Comments are not allowed in the root when parsing XML.
 		if (this.currentNode !== this.rootNode) {
-			this.currentNode[PropertySymbol.appendChild](
-				this.rootNode.createComment(XMLEncodeUtility.decodeXMLEntities(comment)),
+			this.currentNode![PropertySymbol.appendChild](
+				this.rootNode!.createComment(XMLEncodeUtility.decodeXMLEntities(comment)),
 				true
 			);
 		}
@@ -377,14 +379,15 @@ export default class XMLParser {
 	 * @param text Text.
 	 */
 	private parseDocumentType(text: string): void {
+		const markupRegExp = this.markupRegExp!;
 		if (
 			this.currentNode === this.rootNode &&
-			this.rootNode[PropertySymbol.nodeArray].length === 0
+			this.rootNode![PropertySymbol.nodeArray].length === 0
 		) {
 			const documentType = this.getDocumentType(XMLEncodeUtility.decodeXMLEntities(text));
 
 			if (documentType?.name) {
-				this.rootNode[PropertySymbol.appendChild](
+				this.rootNode![PropertySymbol.appendChild](
 					this.window.document.implementation.createDocumentType(
 						documentType.name,
 						documentType.publicId,
@@ -395,23 +398,23 @@ export default class XMLParser {
 				this.readState = MarkupReadStateEnum.any;
 			} else if (documentType) {
 				this.errorMessage = 'xmlParseDocTypeDecl : no DOCTYPE name\n';
-				this.errorIndex = this.markupRegExp.lastIndex - text.length - 2;
+				this.errorIndex = markupRegExp.lastIndex - text.length - 2;
 				this.readState = MarkupReadStateEnum.error;
 			} else {
 				this.errorMessage = 'StartTag: invalid element name\n';
-				this.errorIndex = this.markupRegExp.lastIndex - text.length - 2;
+				this.errorIndex = markupRegExp.lastIndex - text.length - 2;
 				this.readState = MarkupReadStateEnum.error;
 			}
 		} else if (
 			this.currentNode === this.rootNode &&
-			this.rootNode[PropertySymbol.elementArray].length === 1
+			this.rootNode![PropertySymbol.elementArray].length === 1
 		) {
 			this.errorMessage = 'Extra content at the end of the document\n';
-			this.errorIndex = this.markupRegExp.lastIndex - text.length - 2;
+			this.errorIndex = markupRegExp.lastIndex - text.length - 2;
 			this.readState = MarkupReadStateEnum.error;
 		} else {
 			this.errorMessage = 'StartTag: invalid element name\n';
-			this.errorIndex = this.markupRegExp.lastIndex - text.length - 2;
+			this.errorIndex = markupRegExp.lastIndex - text.length - 2;
 			this.readState = MarkupReadStateEnum.error;
 		}
 	}
@@ -423,26 +426,26 @@ export default class XMLParser {
 	 */
 	private parseStartTag(tagName: string): void {
 		const parts = tagName.split(':');
+		const namespacePrefixStack = this.namespacePrefixStack!;
+		const defaultNamespaceStack = this.defaultNamespaceStack!;
 
 		if (parts.length > 1) {
-			this.nextElement = this.rootNode.createElementNS(
-				this.namespacePrefixStack[this.namespacePrefixStack.length - 1]?.get(parts[0]) || null,
+			this.nextElement = this.rootNode!.createElementNS(
+				namespacePrefixStack[namespacePrefixStack.length - 1]?.get(parts[0]) || null,
 				tagName
 			);
 		} else {
-			this.nextElement = this.rootNode.createElementNS(
-				this.defaultNamespaceStack[this.defaultNamespaceStack.length - 1] || null,
+			this.nextElement = this.rootNode!.createElementNS(
+				defaultNamespaceStack[defaultNamespaceStack.length - 1] || null,
 				tagName
 			);
 		}
 
-		this.namespacePrefixStack.push(
-			new Map(this.namespacePrefixStack[this.namespacePrefixStack.length - 1])
-		);
+		namespacePrefixStack.push(new Map(namespacePrefixStack[namespacePrefixStack.length - 1]));
 
 		this.nextTagName = tagName;
 
-		this.startTagIndex = this.markupRegExp.lastIndex;
+		this.startTagIndex = this.markupRegExp!.lastIndex;
 		this.readState = MarkupReadStateEnum.startTag;
 	}
 
@@ -453,11 +456,11 @@ export default class XMLParser {
 	 * @param isSelfClosed Is self closed.
 	 */
 	private parseEndOfStartTag(attributeString: string, isSelfClosed: boolean): void {
-		const namespacePrefix = this.namespacePrefixStack[this.namespacePrefixStack.length - 1];
+		const namespacePrefix = this.namespacePrefixStack![this.namespacePrefixStack!.length - 1];
 
 		if (attributeString) {
 			const attributeRegexp = new RegExp(ATTRIBUTE_REGEXP, 'gm');
-			let attributeMatch: RegExpExecArray;
+			let attributeMatch: RegExpExecArray | null;
 			let lastIndex = 0;
 
 			while ((attributeMatch = attributeRegexp.exec(attributeString))) {
@@ -489,7 +492,7 @@ export default class XMLParser {
 					const value = rawValue
 						? XMLEncodeUtility.decodeXMLAttributeValue(rawValue.replace(NEW_LINE_REGEXP, ' '))
 						: '';
-					const attributes = this.nextElement[PropertySymbol.attributes];
+					const attributes = this.nextElement![PropertySymbol.attributes];
 					const nameParts = name.split(':');
 
 					if (
@@ -503,33 +506,49 @@ export default class XMLParser {
 						return;
 					}
 
-					// In XML, attributes prefixed with "xmlns:" or named "xmlns" should be set to the "http://www.w3.org/2000/xmlns/" namespace.
-					const namespaceURI = nameParts[0] === 'xmlns' ? NamespaceURI.xmlns : null;
+					let namespaceURI: string | null = null;
 
-					if (!attributes.getNamedItemNS(namespaceURI, name)) {
-						const attributeItem = this.rootNode.createAttributeNS(namespaceURI, name);
-						attributeItem[PropertySymbol.value] = value;
-						attributes[PropertySymbol.setNamedItem](attributeItem);
+					// In the SVG namespace, the attribute "xmlns" should be set to the "http://www.w3.org/2000/xmlns/" namespace and "xlink" to the "http://www.w3.org/1999/xlink" namespace.
+					switch (nameParts[0]) {
+						case 'xmlns':
+							namespaceURI = NamespaceURI.xmlns;
+							break;
+						case 'xlink':
+							namespaceURI = NamespaceURI.xlink;
+							break;
+					}
+
+					if (!attributes.getNamedItemNS(namespaceURI, nameParts[1] ?? name)) {
+						const attribute = NodeFactory.createNode(this.rootNode!, this.window.Attr);
+
+						attribute[PropertySymbol.namespaceURI] = namespaceURI;
+						attribute[PropertySymbol.name] = name;
+						attribute[PropertySymbol.localName] =
+							namespaceURI && nameParts[1] ? nameParts[1] : name;
+						attribute[PropertySymbol.prefix] = namespaceURI && nameParts[1] ? nameParts[0] : null;
+						attribute[PropertySymbol.value] = value;
+
+						attributes[PropertySymbol.setNamedItem](attribute);
 
 						// Attributes prefixed with "xmlns:" should be added to the namespace prefix map, so that the prefix can be added as namespaceURI to elements using the prefix.
-						if (attributeItem[PropertySymbol.prefix] === 'xmlns') {
-							namespacePrefix.set(attributeItem[PropertySymbol.localName], value);
+						if (attribute[PropertySymbol.prefix] === 'xmlns') {
+							namespacePrefix!.set(attribute[PropertySymbol.localName], value);
 
 							// If the prefix matches the current element, we should set the namespace URI of the element to the value of the attribute.
 							// We don't need to upgrade the element, as there are no defined element types using a prefix.
 							if (
-								this.nextElement[PropertySymbol.prefix] === attributeItem[PropertySymbol.localName]
+								this.nextElement![PropertySymbol.prefix] === attribute[PropertySymbol.localName]
 							) {
-								this.nextElement[PropertySymbol.namespaceURI] = value;
+								this.nextElement![PropertySymbol.namespaceURI] = value;
 							}
 						}
 						// If the attribute is "xmlns", we should upgrade the element to an element created using the namespace URI.
-						else if (name === 'xmlns' && !this.nextElement[PropertySymbol.prefix]) {
+						else if (name === 'xmlns' && !this.nextElement![PropertySymbol.prefix]) {
 							// We only need to create a new instance if it is a known namespace URI.
 							if (NAMESPACE_URIS.includes(value)) {
-								this.nextElement = this.rootNode.createElementNS(
+								this.nextElement = this.rootNode!.createElementNS(
 									value,
-									this.nextElement[PropertySymbol.tagName]
+									this.nextElement![PropertySymbol.tagName]!
 								);
 								this.nextElement[PropertySymbol.attributes] = attributes;
 								attributes[PropertySymbol.ownerElement] = this.nextElement;
@@ -537,7 +556,7 @@ export default class XMLParser {
 									item[PropertySymbol.ownerElement] = this.nextElement;
 								}
 							} else {
-								this.nextElement[PropertySymbol.namespaceURI] = value;
+								this.nextElement![PropertySymbol.namespaceURI] = value;
 							}
 						}
 					} else {
@@ -565,7 +584,7 @@ export default class XMLParser {
 				const match = attributeStringEnd.match(ATTRIBUTE_WITHOUT_VALUE_REGEXP);
 				if (match) {
 					this.errorMessage = `Specification mandates value for attribute ${match[1]}\n`;
-					this.errorIndex = this.markupRegExp.lastIndex - 2;
+					this.errorIndex = this.markupRegExp!.lastIndex - 2;
 				} else {
 					this.errorMessage = 'attributes construct error\n';
 					this.errorIndex = this.startTagIndex;
@@ -577,9 +596,12 @@ export default class XMLParser {
 		}
 
 		// Prefixed elements need to have a namespace URI defined by a prefixed "xmlns:" attribute either by a parent or in the current element.
-		if (this.nextElement[PropertySymbol.prefix] && !this.nextElement[PropertySymbol.namespaceURI]) {
+		if (
+			this.nextElement![PropertySymbol.prefix] &&
+			!this.nextElement![PropertySymbol.namespaceURI]
+		) {
 			this.errorMessage = `Namespace prefix ${
-				this.nextElement[PropertySymbol.prefix]
+				this.nextElement![PropertySymbol.prefix]
 			} on name is not defined\n`;
 			this.errorIndex = this.lastIndex;
 			this.readState = MarkupReadStateEnum.error;
@@ -589,31 +611,31 @@ export default class XMLParser {
 		// Only one document element is allowed in the document.
 		if (
 			this.currentNode === this.rootNode &&
-			this.rootNode[PropertySymbol.elementArray].length !== 0
+			this.rootNode![PropertySymbol.elementArray].length !== 0
 		) {
 			this.errorMessage = 'Extra content at the end of the document\n';
-			this.errorIndex = this.lastIndex - this.nextElement[PropertySymbol.tagName].length - 1;
+			this.errorIndex = this.lastIndex - this.nextElement![PropertySymbol.tagName]!.length - 1;
 			this.readState = MarkupReadStateEnum.error;
 			return;
 		}
 
-		this.currentNode[PropertySymbol.appendChild](this.nextElement, true);
+		this.currentNode![PropertySymbol.appendChild](this.nextElement!, true);
 
 		// Sets the new element as the current node.
 		// XML nodes can be self closed using "/>"
 		if (!isSelfClosed) {
 			this.currentNode = this.nextElement;
-			this.nodeStack.push(this.currentNode);
+			this.nodeStack.push(this.currentNode!);
 			this.tagNameStack.push(this.nextTagName);
 
 			if (
-				this.currentNode[PropertySymbol.namespaceURI] &&
-				!this.currentNode[PropertySymbol.prefix]
+				(<Element>this.currentNode)[PropertySymbol.namespaceURI] &&
+				!(<Element>this.currentNode)[PropertySymbol.prefix]
 			) {
-				this.defaultNamespaceStack.push(this.currentNode[PropertySymbol.namespaceURI]);
+				this.defaultNamespaceStack!.push((<Element>this.currentNode)[PropertySymbol.namespaceURI]);
 			} else {
-				this.defaultNamespaceStack.push(
-					this.defaultNamespaceStack[this.defaultNamespaceStack.length - 1]
+				this.defaultNamespaceStack!.push(
+					this.defaultNamespaceStack![this.defaultNamespaceStack!.length - 1]
 				);
 			}
 		}
@@ -621,7 +643,7 @@ export default class XMLParser {
 		this.nextElement = null;
 		this.nextTagName = null;
 		this.readState = MarkupReadStateEnum.any;
-		this.startTagIndex = this.markupRegExp.lastIndex;
+		this.startTagIndex = this.markupRegExp!.lastIndex;
 	}
 
 	/**
@@ -634,8 +656,8 @@ export default class XMLParser {
 		if (this.tagNameStack[this.tagNameStack.length - 1] === tagName) {
 			this.nodeStack.pop();
 			this.tagNameStack.pop();
-			this.namespacePrefixStack.pop();
-			this.defaultNamespaceStack.pop();
+			this.namespacePrefixStack!.pop();
+			this.defaultNamespaceStack!.pop();
 			this.currentNode = this.nodeStack[this.nodeStack.length - 1] || this.rootNode;
 			return true;
 		}
@@ -648,21 +670,21 @@ export default class XMLParser {
 	 * @param readXML XML that has been read.
 	 * @param errorMessage Error message.
 	 */
-	private parseError(readXML: string, errorMessage: string): void {
+	private parseError(readXML: string, errorMessage: string | null): void {
 		let errorRoot: Element = (<XMLDocument>this.rootNode).documentElement;
 
 		if (!errorRoot) {
-			const documentElement = this.rootNode.createElementNS(NamespaceURI.html, 'html');
-			const body = this.rootNode.createElementNS(NamespaceURI.html, 'body');
+			const documentElement = this.rootNode!.createElementNS(NamespaceURI.html, 'html');
+			const body = this.rootNode!.createElementNS(NamespaceURI.html, 'body');
 			documentElement.appendChild(body);
 			errorRoot = body;
-			this.rootNode[PropertySymbol.appendChild](documentElement, true);
+			this.rootNode![PropertySymbol.appendChild](documentElement, true);
 		}
 
 		const rows = readXML.split('\n');
 		const column = rows[rows.length - 1].length + 1;
-		const error = `error on line ${rows.length} at column ${column}: ${errorMessage}`;
-		const errorElement = this.rootNode.createElementNS(NamespaceURI.html, 'parsererror');
+		const error = `error on line ${rows.length} at column ${column}: ${errorMessage || 'Unknown error'}`;
+		const errorElement = this.rootNode!.createElementNS(NamespaceURI.html, 'parsererror');
 
 		errorElement.setAttribute(
 			'style',
@@ -692,7 +714,7 @@ export default class XMLParser {
 	 * @param value Value.
 	 * @returns Document type.
 	 */
-	private getDocumentType(value: string): IDocumentType {
+	private getDocumentType(value: string): IDocumentType | null {
 		if (!value.toUpperCase().startsWith('DOCTYPE')) {
 			return null;
 		}

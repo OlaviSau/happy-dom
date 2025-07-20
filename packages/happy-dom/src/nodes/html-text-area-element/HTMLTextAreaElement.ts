@@ -9,6 +9,7 @@ import ValidityState from '../../validity-state/ValidityState.js';
 import HTMLLabelElement from '../html-label-element/HTMLLabelElement.js';
 import HTMLLabelElementUtility from '../html-label-element/HTMLLabelElementUtility.js';
 import NodeList from '../node/NodeList.js';
+import ElementEventAttributeUtility from '../element/ElementEventAttributeUtility.js';
 
 /**
  * HTML Text Area Element.
@@ -21,21 +22,39 @@ export default class HTMLTextAreaElement extends HTMLElement {
 	public declare cloneNode: (deep?: boolean) => HTMLTextAreaElement;
 	public readonly type = 'textarea';
 
-	// Events
-	public oninput: ((event: Event) => void) | null = null;
-	public onselectionchange: ((event: Event) => void) | null = null;
-
 	// Internal properties
 	public [PropertySymbol.validationMessage] = '';
 	public [PropertySymbol.validity] = new ValidityState(this);
-	public [PropertySymbol.value] = null;
+	public [PropertySymbol.value]: string | null = null;
 	public [PropertySymbol.textAreaNode] = this;
 	public [PropertySymbol.formNode]: HTMLFormElement | null = null;
 
 	// Private properties
-	#selectionStart = null;
-	#selectionEnd = null;
+	#selectionStart: number | null = null;
+	#selectionEnd: number | null = null;
 	#selectionDirection = HTMLInputElementSelectionDirectionEnum.none;
+
+	// Events
+
+	/* eslint-disable jsdoc/require-jsdoc */
+
+	public get oninput(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'oninput');
+	}
+
+	public set oninput(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('oninput', value);
+	}
+
+	public get onselectionchange(): ((event: Event) => void) | null {
+		return ElementEventAttributeUtility.getEventListener(this, 'onselectionchange');
+	}
+
+	public set onselectionchange(value: ((event: Event) => void) | null) {
+		this[PropertySymbol.propertyEventListeners].set('onselectionchange', value);
+	}
+
+	/* eslint-enable jsdoc/require-jsdoc */
 
 	/**
 	 * Returns validation message.
@@ -409,7 +428,7 @@ export default class HTMLTextAreaElement extends HTMLElement {
 	 *
 	 * @returns Form.
 	 */
-	public get form(): HTMLFormElement {
+	public get form(): HTMLFormElement | null {
 		if (this[PropertySymbol.formNode]) {
 			return this[PropertySymbol.formNode];
 		}
@@ -497,15 +516,15 @@ export default class HTMLTextAreaElement extends HTMLElement {
 	 */
 	public setRangeText(
 		replacement: string,
-		start: number = null,
-		end: number = null,
+		start: number | null = null,
+		end: number | null = null,
 		selectionMode = HTMLInputElementSelectionModeEnum.preserve
 	): void {
 		if (start === null) {
-			start = this.#selectionStart;
+			start = this.#selectionStart !== null ? this.#selectionStart : 0;
 		}
 		if (end === null) {
-			end = this.#selectionEnd;
+			end = this.#selectionEnd !== null ? this.#selectionEnd : this.value.length;
 		}
 
 		if (start > end) {
@@ -519,8 +538,8 @@ export default class HTMLTextAreaElement extends HTMLElement {
 		end = Math.min(end, this.value.length);
 
 		const val = this.value;
-		let selectionStart = this.#selectionStart;
-		let selectionEnd = this.#selectionEnd;
+		let selectionStart = this.#selectionStart !== null ? this.#selectionStart : 0;
+		let selectionEnd = this.#selectionEnd !== null ? this.#selectionEnd : this.value.length;
 
 		this.value = val.slice(0, start) + replacement + val.slice(end);
 

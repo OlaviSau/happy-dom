@@ -549,7 +549,7 @@ export default class CSSStyleDeclarationPropertyManager {
 	public toString(): string {
 		const result = [];
 		const clone = this.clone();
-		const properties = {};
+		const properties: { [k: string]: ICSSStyleDeclarationPropertyValue } = {};
 
 		for (const shorthandPropertyGroup of TO_STRING_SHORTHAND_PROPERTIES) {
 			for (const shorthandProperty of shorthandPropertyGroup) {

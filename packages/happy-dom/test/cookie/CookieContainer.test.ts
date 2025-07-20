@@ -163,6 +163,21 @@ describe('CookieContainer', () => {
 			).toBe('__secure-key=value');
 		});
 
+		it('Validates secure cookie keys for localhost', () => {
+			const originURL = new URL('http://localhost');
+			const targetURL = new URL('http://localhost');
+
+			expect(CookieStringUtility.stringToCookie(originURL, `__secure-key=value`)).toBe(null);
+
+			cookieContainer.addCookies([
+				<ICookie>CookieStringUtility.stringToCookie(originURL, `__secure-key=value; Secure;`)
+			]);
+
+			expect(
+				CookieStringUtility.cookiesToString(cookieContainer.getCookies(targetURL, false))
+			).toBe('__secure-key=value');
+		});
+
 		it('Validates host cookie keys.', () => {
 			const originURL = new URL('https://example.com/path/to/page/');
 			const targetURL = new URL('https://example.com/path/to/page/');
@@ -253,6 +268,35 @@ describe('CookieContainer', () => {
 					sameSite: CookieSameSiteEnum.strict
 				}
 			]);
+		});
+	});
+
+	describe('clearCookies()', () => {
+		it('Clears cookies.', () => {
+			const originURL = new URL('https://example.com/path/to/page/');
+			const expires = new Date(60 * 1000 + Date.now());
+
+			cookieContainer.addCookies([
+				{
+					key: 'key1',
+					originURL
+				},
+				{
+					key: 'key2',
+					originURL,
+					value: 'value2',
+					domain: 'example.com',
+					path: '/path/to/page/',
+					expires,
+					httpOnly: true,
+					secure: true,
+					sameSite: CookieSameSiteEnum.strict
+				}
+			]);
+
+			cookieContainer.clearCookies();
+
+			expect(cookieContainer.getCookies(originURL)).toEqual([]);
 		});
 	});
 });
