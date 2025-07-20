@@ -16,6 +16,30 @@ describe('CSSStyleDeclaration', () => {
 		element = document.createElement('div');
 	});
 
+	describe('set border-top', () => {
+		let declaration: CSSStyleDeclaration;
+		beforeEach(() => {
+			declaration = new CSSStyleDeclaration(PropertySymbol.illegalConstructor, window, {
+				element
+			});
+			declaration.setProperty('border-top', '1px solid black');
+		});
+
+		it('Should have border-top on the element', () => {
+			expect(element.style.cssText).to.equal('border-top: 1px solid black');
+		});
+
+		describe('set border', () => {
+			beforeEach(() => {
+				declaration.setProperty('border', '1px solid black');
+			});
+
+			it('Should reset all other border properties', () => {
+				expect(element.style.cssText).to.equal('border: 1px solid black');
+			});
+		});
+	});
+
 	describe(`get {number}()`, () => {
 		it('Returns name of property when style is set on element.', () => {
 			const declaration = new CSSStyleDeclaration(PropertySymbol.illegalConstructor, window, {

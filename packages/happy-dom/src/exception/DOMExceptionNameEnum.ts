@@ -12,6 +12,7 @@ enum DOMExceptionNameEnum {
 	networkError = 'NetworkError',
 	domException = 'DOMException',
 	invalidAccessError = 'InvalidAccessError',
+	noModificationAllowedError = 'NoModificationAllowedError',
 	unknownError = 'UnknownError',
 	abortError = 'AbortError',
 	timeoutError = 'TimeoutError',

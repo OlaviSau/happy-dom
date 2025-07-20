@@ -2,8 +2,8 @@ import CSSStyleDeclarationValueParser from './CSSStyleDeclarationValueParser.js'
 import ICSSStyleDeclarationPropertyValue from './ICSSStyleDeclarationPropertyValue.js';
 
 const RECT_REGEXP = /^rect\((.*)\)$/i;
-const SPLIT_COMMA_SEPARATED_WITH_PARANTHESES_REGEXP = /,(?=(?:(?:(?!\))[\s\S])*\()|[^\(\)]*$)/; // Split on commas that are outside of parentheses
-const SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP = /\s+(?=(?:(?:(?!\))[\s\S])*\()|[^\(\)]*$)/; // Split on spaces that are outside of parentheses
+const SPLIT_COMMA_SEPARATED_WITH_PARENTHESES_REGEXP = /,(?=(?:(?:(?!\))[\s\S])*\()|[^()]*$)/; // Split on commas that are outside of parentheses
+const SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP = /\s+(?=(?:(?:(?!\))[\s\S])*\()|[^()]*$)/; // Split on spaces that are outside of parentheses
 const WHITE_SPACE_GLOBAL_REGEXP = /\s+/gm;
 const BORDER_STYLE = [
 	'none',
@@ -498,7 +498,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			...this.getOutlineWidth('initial', important)
 		};
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		for (const part of parts) {
 			const width = this.getOutlineWidth(part, important);
@@ -627,19 +627,20 @@ export default class CSSStyleDeclarationPropertySetParser {
 		value: string,
 		important: boolean
 	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
+		// what happens to other vars
+		// every other property needs wiped
 		const variable = CSSStyleDeclarationValueParser.getVariable(value);
 		if (variable) {
 			return { border: { value: variable, important } };
 		}
 
-		const globalValue = CSSStyleDeclarationValueParser.getGlobal(value);
-
-		if (globalValue) {
+		if (CSSStyleDeclarationValueParser.isGlobal(value)) {
+			value = value.toLowerCase();
 			return {
-				...this.getBorderWidth(globalValue, important),
-				...this.getBorderStyle(globalValue, important),
-				...this.getBorderColor(globalValue, important),
-				...this.getBorderImage(globalValue, important)
+				...this.getBorderWidth(value, important),
+				...this.getBorderStyle(value, important),
+				...this.getBorderColor(value, important),
+				...this.getBorderImage(value, important)
 			};
 		}
 
@@ -652,7 +653,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 
 		const parts = value
 			.replace(/\s*,\s*/g, ',')
-			.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+			.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		for (const part of parts) {
 			const width = this.getBorderWidth(part, important);
@@ -698,7 +699,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			};
 		}
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 		const top = this.getBorderTopWidth(parts[0], important);
 		const right = this.getBorderRightWidth(parts[1] || parts[0], important);
 		const bottom = this.getBorderBottomWidth(parts[2] || parts[0], important);
@@ -744,7 +745,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			};
 		}
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 		const top = this.getBorderTopStyle(parts[0], important);
 		const right = this.getBorderRightStyle(parts[1] || parts[0], important);
 		const bottom = this.getBorderBottomStyle(parts[2] || parts[0], important);
@@ -791,7 +792,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			};
 		}
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 		const top = this.getBorderTopColor(parts[0], important);
 		const right = this.getBorderRightColor(parts[1] || parts[0], important);
 		const bottom = this.getBorderBottomColor(parts[2] || parts[0], important);
@@ -846,7 +847,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			parsedValue = parsedValue.replace(sourceMatch[0], '');
 		}
 
-		const parts = parsedValue.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = parsedValue.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		if (sourceMatch) {
 			parts.push(sourceMatch[1]);
@@ -1041,7 +1042,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			};
 		}
 
-		const parts = lowerValue.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = lowerValue.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		if (parts.length > 4) {
 			return null;
@@ -1102,7 +1103,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			};
 		}
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		if (parts.length > 4) {
 			return null;
@@ -1157,7 +1158,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			};
 		}
 
-		const parts = lowerValue.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = lowerValue.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		if (parts.length > 2) {
 			return null;
@@ -1548,7 +1549,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			};
 		}
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 		const topLeft = this.getBorderTopLeftRadius(parts[0], important);
 		const topRight = this.getBorderTopRightRadius(parts[1] || parts[0], important);
 		const bottomRight = this.getBorderBottomRightRadius(parts[2] || parts[0], important);
@@ -1686,7 +1687,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			...this.getBorderTopColor('initial', important)
 		};
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		for (const part of parts) {
 			const width = this.getBorderTopWidth(part, important);
@@ -1735,7 +1736,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			...this.getBorderRightColor('initial', important)
 		};
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		for (const part of parts) {
 			const width = this.getBorderRightWidth(part, important);
@@ -1784,7 +1785,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			...this.getBorderBottomColor('initial', important)
 		};
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		for (const part of parts) {
 			const width = this.getBorderBottomWidth(part, important);
@@ -1833,7 +1834,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			...this.getBorderLeftColor('initial', important)
 		};
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		for (const part of parts) {
 			const width = this.getBorderLeftWidth(part, important);
@@ -1851,36 +1852,36 @@ export default class CSSStyleDeclarationPropertySetParser {
 	}
 
 	/**
-	 * Returns padding.
+	 * Returns box like properties, padding and margin are examples.
 	 *
 	 * @param value Value.
 	 * @param important Important.
+	 * @param name Box name.
 	 */
-	public static getPadding(
+	public static getBox(
 		value: string,
-		important: boolean
+		important: boolean,
+		name: 'margin' | 'padding'
 	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
 		const variable = CSSStyleDeclarationValueParser.getVariable(value);
 		if (variable) {
 			return { padding: { value: variable, important } };
 		}
 
-		const globalValue = CSSStyleDeclarationValueParser.getGlobal(value);
-
-		if (globalValue) {
+		if (CSSStyleDeclarationValueParser.isGlobal(value)) {
 			return {
-				...this.getPaddingTop(globalValue, important),
-				...this.getPaddingRight(globalValue, important),
-				...this.getPaddingBottom(globalValue, important),
-				...this.getPaddingLeft(globalValue, important)
+				...this.getBoxEdge(value, important, `${name}-top`),
+				...this.getBoxEdge(value, important, `${name}-right`),
+				...this.getBoxEdge(value, important, `${name}-bottom`),
+				...this.getBoxEdge(value, important, `${name}-left`)
 			};
 		}
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
-		const top = this.getPaddingTop(parts[0], important);
-		const right = this.getPaddingRight(parts[1] || parts[0], important);
-		const bottom = this.getPaddingBottom(parts[2] || parts[0], important);
-		const left = this.getPaddingLeft(parts[3] || parts[1] || parts[0], important);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
+		const top = this.getBoxEdge(parts[0], important, `${name}-top`);
+		const right = this.getBoxEdge(parts[1] || parts[0], important, `${name}-right`);
+		const bottom = this.getBoxEdge(parts[2] || parts[0], important, `${name}-bottom`);
+		const left = this.getBoxEdge(parts[3] || parts[1] || parts[0], important, `${name}-left`);
 
 		if (!top || !right || !bottom || !left) {
 			return null;
@@ -1895,224 +1896,27 @@ export default class CSSStyleDeclarationPropertySetParser {
 	}
 
 	/**
-	 * Returns padding top.
+	 * Returns property edge - like margin-top, padding-top.
 	 *
 	 * @param value Value.
 	 * @param important Important.
+	 * @param property Property
 	 * @returns Property values.
 	 */
-	public static getPaddingTop(
+	public static getBoxEdge(
 		value: string,
-		important: boolean
+		important: boolean,
+		property: string
 	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
 		const variable = CSSStyleDeclarationValueParser.getVariable(value);
 		if (variable) {
-			return { 'padding-top': { value: variable, important } };
-		}
-
-		const padding =
-			CSSStyleDeclarationValueParser.getGlobal(value) ||
-			CSSStyleDeclarationValueParser.getMeasurement(value);
-		return padding ? { 'padding-top': { value: padding, important } } : null;
-	}
-
-	/**
-	 * Returns padding right.
-	 *
-	 * @param value Value.
-	 * @param important Important.
-	 * @returns Property values.
-	 */
-	public static getPaddingRight(
-		value: string,
-		important: boolean
-	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
-		const variable = CSSStyleDeclarationValueParser.getVariable(value);
-		if (variable) {
-			return { 'padding-right': { value: variable, important } };
-		}
-
-		const padding =
-			CSSStyleDeclarationValueParser.getGlobal(value) ||
-			CSSStyleDeclarationValueParser.getMeasurement(value);
-		return padding ? { 'padding-right': { value: padding, important } } : null;
-	}
-
-	/**
-	 * Returns padding bottom.
-	 *
-	 * @param value Value.
-	 * @param important Important.
-	 * @returns Property values.
-	 */
-	public static getPaddingBottom(
-		value: string,
-		important: boolean
-	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
-		const variable = CSSStyleDeclarationValueParser.getVariable(value);
-		if (variable) {
-			return { 'padding-bottom': { value: variable, important } };
-		}
-
-		const padding =
-			CSSStyleDeclarationValueParser.getGlobal(value) ||
-			CSSStyleDeclarationValueParser.getMeasurement(value);
-		return padding ? { 'padding-bottom': { value: padding, important } } : null;
-	}
-
-	/**
-	 * Returns padding left.
-	 *
-	 * @param value Value.
-	 * @param important Important.
-	 * @returns Property values.
-	 */
-	public static getPaddingLeft(
-		value: string,
-		important: boolean
-	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
-		const variable = CSSStyleDeclarationValueParser.getVariable(value);
-		if (variable) {
-			return { 'padding-left': { value: variable, important } };
-		}
-
-		const padding =
-			CSSStyleDeclarationValueParser.getGlobal(value) ||
-			CSSStyleDeclarationValueParser.getMeasurement(value);
-		return padding ? { 'padding-left': { value: padding, important } } : null;
-	}
-
-	/**
-	 * Returns margin.
-	 *
-	 * @param value Value.
-	 * @param important Important.
-	 * @returns Property values.
-	 */
-	public static getMargin(
-		value: string,
-		important: boolean
-	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
-		const variable = CSSStyleDeclarationValueParser.getVariable(value);
-		if (variable) {
-			return { margin: { value: variable, important } };
-		}
-
-		const globalValue = CSSStyleDeclarationValueParser.getGlobal(value);
-
-		if (globalValue) {
-			return {
-				...this.getMarginTop(globalValue, important),
-				...this.getMarginRight(globalValue, important),
-				...this.getMarginBottom(globalValue, important),
-				...this.getMarginLeft(globalValue, important)
-			};
-		}
-
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
-		const top = this.getMarginTop(parts[0], important);
-		const right = this.getMarginRight(parts[1] || parts[0], important);
-		const bottom = this.getMarginBottom(parts[2] || parts[0], important);
-		const left = this.getMarginLeft(parts[3] || parts[1] || parts[0], important);
-
-		if (!top || !right || !bottom || !left) {
-			return null;
-		}
-
-		return {
-			...top,
-			...right,
-			...bottom,
-			...left
-		};
-	}
-
-	/**
-	 * Returns margin top.
-	 *
-	 * @param value Value.
-	 * @param important Important.
-	 * @returns Property values.
-	 */
-	public static getMarginTop(
-		value: string,
-		important: boolean
-	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
-		const variable = CSSStyleDeclarationValueParser.getVariable(value);
-		if (variable) {
-			return { 'margin-top': { value: variable, important } };
+			return { [property]: { value: variable, important } };
 		}
 
 		const margin =
 			CSSStyleDeclarationValueParser.getGlobal(value) ||
 			CSSStyleDeclarationValueParser.getAutoMeasurement(value);
-		return margin ? { 'margin-top': { value: margin, important } } : null;
-	}
-
-	/**
-	 * Returns margin right.
-	 *
-	 * @param value Value.
-	 * @param important Important.
-	 * @returns Property values.
-	 */
-	public static getMarginRight(
-		value: string,
-		important: boolean
-	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
-		const variable = CSSStyleDeclarationValueParser.getVariable(value);
-		if (variable) {
-			return { 'margin-right': { value: variable, important } };
-		}
-
-		const margin =
-			CSSStyleDeclarationValueParser.getGlobal(value) ||
-			CSSStyleDeclarationValueParser.getAutoMeasurement(value);
-		return margin ? { 'margin-right': { value: margin, important } } : null;
-	}
-
-	/**
-	 * Returns margin right.
-	 *
-	 * @param value Value.
-	 * @param important Important.
-	 * @returns Property values.
-	 */
-	public static getMarginBottom(
-		value: string,
-		important: boolean
-	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
-		const variable = CSSStyleDeclarationValueParser.getVariable(value);
-		if (variable) {
-			return { 'margin-bottom': { value: variable, important } };
-		}
-
-		const margin =
-			CSSStyleDeclarationValueParser.getGlobal(value) ||
-			CSSStyleDeclarationValueParser.getAutoMeasurement(value);
-		return margin ? { 'margin-bottom': { value: margin, important } } : null;
-	}
-
-	/**
-	 * Returns margin left.
-	 *
-	 * @param value Value.
-	 * @param important Important.
-	 * @returns Property values.
-	 */
-	public static getMarginLeft(
-		value: string,
-		important: boolean
-	): { [key: string]: ICSSStyleDeclarationPropertyValue } {
-		const variable = CSSStyleDeclarationValueParser.getVariable(value);
-		if (variable) {
-			return { 'margin-left': { value: variable, important } };
-		}
-
-		const margin =
-			CSSStyleDeclarationValueParser.getGlobal(value) ||
-			CSSStyleDeclarationValueParser.getAutoMeasurement(value);
-		return margin ? { 'margin-left': { value: margin, important } } : null;
+		return margin ? { [property]: { value: margin, important } } : null;
 	}
 
 	/**
@@ -2167,7 +1971,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			};
 		}
 
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 		const flexGrow = this.getFlexGrow(parts[0], important);
 		const flexShrink = this.getFlexShrink(parts[1] || '1', important);
 		const flexBasis = this.getFlexBasis(parts[2] || '0%', important);
@@ -2303,7 +2107,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 		const parts = value
 			.replace(/\s,\s/g, ',')
 			.replace(/\s\/\s/g, '/')
-			.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+			.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		const backgroundPositions = [];
 
@@ -2400,7 +2204,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			return { 'background-size': { value: lowerValue, important } };
 		}
 
-		const imageParts = lowerValue.split(SPLIT_COMMA_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const imageParts = lowerValue.split(SPLIT_COMMA_SEPARATED_WITH_PARENTHESES_REGEXP);
 		const parsed = [];
 
 		for (const imagePart of imageParts) {
@@ -2571,12 +2375,12 @@ export default class CSSStyleDeclarationPropertySetParser {
 			};
 		}
 
-		const imageParts = value.split(SPLIT_COMMA_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const imageParts = value.split(SPLIT_COMMA_SEPARATED_WITH_PARENTHESES_REGEXP);
 		let x = '';
 		let y = '';
 
 		for (const imagePart of imageParts) {
-			const parts = imagePart.trim().split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+			const parts = imagePart.trim().split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 			if (x) {
 				x += ',';
@@ -2684,11 +2488,11 @@ export default class CSSStyleDeclarationPropertySetParser {
 			return { 'background-position-x': { value: lowerValue, important } };
 		}
 
-		const imageParts = lowerValue.split(SPLIT_COMMA_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const imageParts = lowerValue.split(SPLIT_COMMA_SEPARATED_WITH_PARENTHESES_REGEXP);
 		let parsedValue = '';
 
 		for (const imagePart of imageParts) {
-			const parts = imagePart.trim().split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+			const parts = imagePart.trim().split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 			if (parsedValue) {
 				parsedValue += ',';
@@ -2735,11 +2539,11 @@ export default class CSSStyleDeclarationPropertySetParser {
 			return { 'background-position-y': { value: lowerValue, important } };
 		}
 
-		const imageParts = lowerValue.split(SPLIT_COMMA_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const imageParts = lowerValue.split(SPLIT_COMMA_SEPARATED_WITH_PARENTHESES_REGEXP);
 		let parsedValue = '';
 
 		for (const imagePart of imageParts) {
-			const parts = imagePart.trim().split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+			const parts = imagePart.trim().split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 			if (parsedValue) {
 				parsedValue += ',';
@@ -2811,7 +2615,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			return { 'background-image': { value: lowerValue, important } };
 		}
 
-		const parts = value.split(SPLIT_COMMA_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_COMMA_SEPARATED_WITH_PARENTHESES_REGEXP);
 		const parsed = [];
 
 		for (const part of parts) {
@@ -2922,7 +2726,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 
 		const parts = value
 			.replace(/\s*\/\s*/g, '/')
-			.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+			.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 
 		for (let i = 0, max = parts.length; i < max; i++) {
 			const part = parts[i];
@@ -2990,7 +2794,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 		if (CSSStyleDeclarationValueParser.getGlobal(lowerValue) || FONT_STYLE.includes(lowerValue)) {
 			return { 'font-style': { value: lowerValue, important } };
 		}
-		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARANTHESES_REGEXP);
+		const parts = value.split(SPLIT_SPACE_SEPARATED_WITH_PARENTHESES_REGEXP);
 		if (parts.length === 2 && parts[0] === 'oblique') {
 			const degree = CSSStyleDeclarationValueParser.getDegree(parts[1]);
 			return degree ? { 'font-style': { value: lowerValue, important } } : null;

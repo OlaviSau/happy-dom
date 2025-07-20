@@ -17,13 +17,10 @@ const TO_STRING_SHORTHAND_PROPERTIES = [
  * Computed this.properties property parser.
  */
 export default class CSSStyleDeclarationPropertyManager {
-	public properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	} = {};
-	private definedPropertyNames: { [k: string]: boolean } = {};
+	public properties = new Map<string, ICSSStyleDeclarationPropertyValue>();
 
 	/**
-	 * Class construtor.
+	 * Class constructor.
 	 *
 	 * @param [options] Options.
 	 * @param [options.cssText] CSS string.
@@ -46,24 +43,20 @@ export default class CSSStyleDeclarationPropertyManager {
 	 * @returns Property value.
 	 */
 	public get(name: string): ICSSStyleDeclarationPropertyValue | null {
-		if (this.properties[name]) {
-			return this.properties[name];
+		if (this.properties.has(name)) {
+			return this.properties.get(name);
 		}
 		switch (name) {
-			case 'margin':
-				return CSSStyleDeclarationPropertyGetParser.getMargin(this.properties);
 			case 'padding':
-				return CSSStyleDeclarationPropertyGetParser.getPadding(this.properties);
+			case 'margin':
+				return CSSStyleDeclarationPropertyGetParser.getRectangleEdges(this.properties, name);
 			case 'border':
 				return CSSStyleDeclarationPropertyGetParser.getBorder(this.properties);
 			case 'border-top':
-				return CSSStyleDeclarationPropertyGetParser.getBorderTop(this.properties);
 			case 'border-right':
-				return CSSStyleDeclarationPropertyGetParser.getBorderRight(this.properties);
 			case 'border-bottom':
-				return CSSStyleDeclarationPropertyGetParser.getBorderBottom(this.properties);
 			case 'border-left':
-				return CSSStyleDeclarationPropertyGetParser.getBorderLeft(this.properties);
+				return CSSStyleDeclarationPropertyGetParser.getBorderEdge(this.properties, name);
 			case 'border-color':
 				return CSSStyleDeclarationPropertyGetParser.getBorderColor(this.properties);
 			case 'border-style':
@@ -86,7 +79,7 @@ export default class CSSStyleDeclarationPropertyManager {
 				return CSSStyleDeclarationPropertyGetParser.getFont(this.properties);
 		}
 
-		return this.properties[name] || null;
+		return this.properties.get(name) || null;
 	}
 
 	/**
@@ -95,145 +88,144 @@ export default class CSSStyleDeclarationPropertyManager {
 	 * @param name Property name.
 	 */
 	public remove(name: string): void {
-		delete this.properties[name];
-		delete this.definedPropertyNames[name];
+		this.properties.delete(name);
 
 		switch (name) {
 			case 'border':
-				delete this.properties['border-top-width'];
-				delete this.properties['border-right-width'];
-				delete this.properties['border-bottom-width'];
-				delete this.properties['border-left-width'];
-				delete this.properties['border-top-style'];
-				delete this.properties['border-right-style'];
-				delete this.properties['border-bottom-style'];
-				delete this.properties['border-left-style'];
-				delete this.properties['border-top-color'];
-				delete this.properties['border-right-color'];
-				delete this.properties['border-bottom-color'];
-				delete this.properties['border-left-color'];
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
+				this.properties.delete('border-top-width');
+				this.properties.delete('border-right-width');
+				this.properties.delete('border-bottom-width');
+				this.properties.delete('border-left-width');
+				this.properties.delete('border-top-style');
+				this.properties.delete('border-right-style');
+				this.properties.delete('border-bottom-style');
+				this.properties.delete('border-left-style');
+				this.properties.delete('border-top-color');
+				this.properties.delete('border-right-color');
+				this.properties.delete('border-bottom-color');
+				this.properties.delete('border-left-color');
+				this.properties.delete('border-image-source');
+				this.properties.delete('border-image-slice');
+				this.properties.delete('border-image-width');
+				this.properties.delete('border-image-outset');
+				this.properties.delete('border-image-repeat');
 				break;
 			case 'border-top':
-				delete this.properties['border-top-width'];
-				delete this.properties['border-top-style'];
-				delete this.properties['border-top-color'];
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
+				this.properties.delete('border-top-width');
+				this.properties.delete('border-top-style');
+				this.properties.delete('border-top-color');
+				this.properties.delete('border-image-source');
+				this.properties.delete('border-image-slice');
+				this.properties.delete('border-image-width');
+				this.properties.delete('border-image-outset');
+				this.properties.delete('border-image-repeat');
 				break;
 			case 'border-right':
-				delete this.properties['border-right-width'];
-				delete this.properties['border-right-style'];
-				delete this.properties['border-right-color'];
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
+				this.properties.delete('border-right-width');
+				this.properties.delete('border-right-style');
+				this.properties.delete('border-right-color');
+				this.properties.delete('border-image-source');
+				this.properties.delete('border-image-slice');
+				this.properties.delete('border-image-width');
+				this.properties.delete('border-image-outset');
+				this.properties.delete('border-image-repeat');
 				break;
 			case 'border-bottom':
-				delete this.properties['border-bottom-width'];
-				delete this.properties['border-bottom-style'];
-				delete this.properties['border-bottom-color'];
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
+				this.properties.delete('border-bottom-width');
+				this.properties.delete('border-bottom-style');
+				this.properties.delete('border-bottom-color');
+				this.properties.delete('border-image-source');
+				this.properties.delete('border-image-slice');
+				this.properties.delete('border-image-width');
+				this.properties.delete('border-image-outset');
+				this.properties.delete('border-image-repeat');
 				break;
 			case 'border-left':
-				delete this.properties['border-left-width'];
-				delete this.properties['border-left-style'];
-				delete this.properties['border-left-color'];
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
+				this.properties.delete('border-left-width');
+				this.properties.delete('border-left-style');
+				this.properties.delete('border-left-color');
+				this.properties.delete('border-image-source');
+				this.properties.delete('border-image-slice');
+				this.properties.delete('border-image-width');
+				this.properties.delete('border-image-outset');
+				this.properties.delete('border-image-repeat');
 				break;
 			case 'border-width':
-				delete this.properties['border-top-width'];
-				delete this.properties['border-right-width'];
-				delete this.properties['border-bottom-width'];
-				delete this.properties['border-left-width'];
+				this.properties.delete('border-top-width');
+				this.properties.delete('border-right-width');
+				this.properties.delete('border-bottom-width');
+				this.properties.delete('border-left-width');
 				break;
 			case 'border-style':
-				delete this.properties['border-top-style'];
-				delete this.properties['border-right-style'];
-				delete this.properties['border-bottom-style'];
-				delete this.properties['border-left-style'];
+				this.properties.delete('border-top-style');
+				this.properties.delete('border-right-style');
+				this.properties.delete('border-bottom-style');
+				this.properties.delete('border-left-style');
 				break;
 			case 'border-color':
-				delete this.properties['border-top-color'];
-				delete this.properties['border-right-color'];
-				delete this.properties['border-bottom-color'];
-				delete this.properties['border-left-color'];
+				this.properties.delete('border-top-color');
+				this.properties.delete('border-right-color');
+				this.properties.delete('border-bottom-color');
+				this.properties.delete('border-left-color');
 				break;
 			case 'border-image':
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
+				this.properties.delete('border-image-source');
+				this.properties.delete('border-image-slice');
+				this.properties.delete('border-image-width');
+				this.properties.delete('border-image-outset');
+				this.properties.delete('border-image-repeat');
 				break;
 			case 'border-radius':
-				delete this.properties['border-top-left-radius'];
-				delete this.properties['border-top-right-radius'];
-				delete this.properties['border-bottom-right-radius'];
-				delete this.properties['border-bottom-left-radius'];
+				this.properties.delete('border-top-left-radius');
+				this.properties.delete('border-top-right-radius');
+				this.properties.delete('border-bottom-right-radius');
+				this.properties.delete('border-bottom-left-radius');
 				break;
 			case 'outline':
-				delete this.properties['outline-color'];
-				delete this.properties['outline-style'];
-				delete this.properties['outline-width'];
+				this.properties.delete('outline-color');
+				this.properties.delete('outline-style');
+				this.properties.delete('outline-width');
 				break;
 			case 'background':
-				delete this.properties['background-color'];
-				delete this.properties['background-image'];
-				delete this.properties['background-repeat'];
-				delete this.properties['background-attachment'];
-				delete this.properties['background-position-x'];
-				delete this.properties['background-position-y'];
-				delete this.properties['background-size'];
-				delete this.properties['background-origin'];
-				delete this.properties['background-clip'];
+				this.properties.delete('background-color');
+				this.properties.delete('background-image');
+				this.properties.delete('background-repeat');
+				this.properties.delete('background-attachment');
+				this.properties.delete('background-position-x');
+				this.properties.delete('background-position-y');
+				this.properties.delete('background-size');
+				this.properties.delete('background-origin');
+				this.properties.delete('background-clip');
 				break;
 			case 'background-position':
-				delete this.properties['background-position-x'];
-				delete this.properties['background-position-y'];
+				this.properties.delete('background-position-x');
+				this.properties.delete('background-position-y');
 				break;
 			case 'flex':
-				delete this.properties['flex-grow'];
-				delete this.properties['flex-shrink'];
-				delete this.properties['flex-basis'];
+				this.properties.delete('flex-grow');
+				this.properties.delete('flex-shrink');
+				this.properties.delete('flex-basis');
 				break;
 			case 'font':
-				delete this.properties['font-style'];
-				delete this.properties['font-variant'];
-				delete this.properties['font-weight'];
-				delete this.properties['font-stretch'];
-				delete this.properties['font-size'];
-				delete this.properties['line-height'];
-				delete this.properties['font-family'];
+				this.properties.delete('font-style');
+				this.properties.delete('font-variant');
+				this.properties.delete('font-weight');
+				this.properties.delete('font-stretch');
+				this.properties.delete('font-size');
+				this.properties.delete('line-height');
+				this.properties.delete('font-family');
 				break;
 			case 'padding':
-				delete this.properties['padding-top'];
-				delete this.properties['padding-right'];
-				delete this.properties['padding-bottom'];
-				delete this.properties['padding-left'];
+				this.properties.delete('padding-top');
+				this.properties.delete('padding-right');
+				this.properties.delete('padding-bottom');
+				this.properties.delete('padding-left');
 				break;
 			case 'margin':
-				delete this.properties['margin-top'];
-				delete this.properties['margin-right'];
-				delete this.properties['margin-bottom'];
-				delete this.properties['margin-left'];
+				this.properties.delete('margin-top');
+				this.properties.delete('margin-right');
+				this.properties.delete('margin-bottom');
+				this.properties.delete('margin-left');
 				break;
 		}
 	}
@@ -246,12 +238,7 @@ export default class CSSStyleDeclarationPropertyManager {
 	 * @param important Important.
 	 */
 	public set(name: string, value: string, important: boolean): void {
-		if (value === null) {
-			this.remove(name);
-			return;
-		}
-
-		let properties = null;
+		let properties = {};
 
 		switch (name) {
 			case 'border':
@@ -404,35 +391,19 @@ export default class CSSStyleDeclarationPropertyManager {
 			case 'flex-basis':
 				properties = CSSStyleDeclarationPropertySetParser.getFlexBasis(value, important);
 				break;
+			case 'margin':
 			case 'padding':
-				properties = CSSStyleDeclarationPropertySetParser.getPadding(value, important);
+				properties = CSSStyleDeclarationPropertySetParser.getBox(value, important, name);
 				break;
 			case 'padding-top':
-				properties = CSSStyleDeclarationPropertySetParser.getPaddingTop(value, important);
-				break;
 			case 'padding-right':
-				properties = CSSStyleDeclarationPropertySetParser.getPaddingRight(value, important);
-				break;
 			case 'padding-bottom':
-				properties = CSSStyleDeclarationPropertySetParser.getPaddingBottom(value, important);
-				break;
 			case 'padding-left':
-				properties = CSSStyleDeclarationPropertySetParser.getPaddingLeft(value, important);
-				break;
-			case 'margin':
-				properties = CSSStyleDeclarationPropertySetParser.getMargin(value, important);
-				break;
 			case 'margin-top':
-				properties = CSSStyleDeclarationPropertySetParser.getMarginTop(value, important);
-				break;
 			case 'margin-right':
-				properties = CSSStyleDeclarationPropertySetParser.getMarginRight(value, important);
-				break;
 			case 'margin-bottom':
-				properties = CSSStyleDeclarationPropertySetParser.getMarginBottom(value, important);
-				break;
 			case 'margin-left':
-				properties = CSSStyleDeclarationPropertySetParser.getMarginLeft(value, important);
+				properties = CSSStyleDeclarationPropertySetParser.getBoxEdge(value, important, name);
 				break;
 			case 'background':
 				properties = CSSStyleDeclarationPropertySetParser.getBackground(value, important);
@@ -516,17 +487,20 @@ export default class CSSStyleDeclarationPropertyManager {
 			default:
 				const trimmedValue = value.trim();
 				if (trimmedValue) {
-					const globalValue = CSSStyleDeclarationValueParser.getGlobal(trimmedValue);
 					properties = {
-						[name]: { value: globalValue || trimmedValue, important }
+						[name]: {
+							value: CSSStyleDeclarationValueParser.isGlobal(trimmedValue)
+								? trimmedValue.toLowerCase()
+								: trimmedValue,
+							important
+						}
 					};
 				}
 				break;
 		}
 
-		if (properties !== null && Object.keys(properties).length > 0) {
-			this.definedPropertyNames[name] = true;
-			Object.assign(this.properties, properties);
+		for (const [key, value] of Object.entries(properties ?? {})) {
+			this.properties.set(key, <ICSSStyleDeclarationPropertyValue>value);
 		}
 	}
 
@@ -536,11 +510,14 @@ export default class CSSStyleDeclarationPropertyManager {
 	 * @returns Clone.
 	 */
 	public clone(): CSSStyleDeclarationPropertyManager {
-		const _class = <typeof CSSStyleDeclarationPropertyManager>this.constructor;
-		const clone: CSSStyleDeclarationPropertyManager = new _class();
+		const clone: CSSStyleDeclarationPropertyManager = new (<
+			typeof CSSStyleDeclarationPropertyManager
+		>this.constructor)();
 
-		clone.properties = JSON.parse(JSON.stringify(this.properties));
-		clone.definedPropertyNames = Object.assign({}, this.definedPropertyNames);
+		clone.properties = new Map<string, ICSSStyleDeclarationPropertyValue>();
+		for (const [propertyName, property] of this.properties.entries()) {
+			clone.properties.set(propertyName, { value: property.value, important: property.important });
+		}
 
 		return clone;
 	}
@@ -551,7 +528,7 @@ export default class CSSStyleDeclarationPropertyManager {
 	 * @returns Size.
 	 */
 	public size(): number {
-		return Object.keys(this.properties).length;
+		return this.properties.size;
 	}
 
 	/**
@@ -561,7 +538,7 @@ export default class CSSStyleDeclarationPropertyManager {
 	 * @returns Property name.
 	 */
 	public item(index: number): string {
-		return Object.keys(this.properties)[index] || '';
+		return this.properties.keys()[index] || '';
 	}
 
 	/**
@@ -600,27 +577,8 @@ export default class CSSStyleDeclarationPropertyManager {
 			}
 		}
 
-		for (const name of Object.keys(clone.properties)) {
-			properties[name] = clone.get(name);
-		}
-
-		for (const definedPropertyName of Object.keys(this.definedPropertyNames)) {
-			const property = properties[definedPropertyName];
-			if (property) {
-				result.push(
-					`${definedPropertyName}: ${property.value}${property.important ? ' !important' : ''};`
-				);
-				delete properties[definedPropertyName];
-			}
-		}
-
-		for (const propertyName of Object.keys(properties)) {
-			const property = properties[propertyName];
-			if (property) {
-				result.push(
-					`${propertyName}: ${property.value}${property.important ? ' !important' : ''};`
-				);
-			}
+		for (const [propertyName, property] of clone.properties.entries()) {
+			result.push(`${propertyName}: ${property.value}${property.important ? ' !important' : ''};`);
 		}
 
 		return result.join(' ');

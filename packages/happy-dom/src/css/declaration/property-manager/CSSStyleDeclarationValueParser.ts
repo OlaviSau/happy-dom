@@ -9,7 +9,7 @@ const URL_REGEXP = /^url\(\s*([^)]*)\s*\)$/;
 const INTEGER_REGEXP = /^[0-9]+$/;
 const FLOAT_REGEXP = /^[0-9.]+$/;
 const CALC_REGEXP = /^calc\([^^)]+\)$/;
-const CSS_VARIABLE_REGEXP = /^var\(\s*(--[^)\s]+)\)$/;
+const CSS_VARIABLE_REGEXP = /^var\(\s*(--[^)\s]+)\s*\)$/;
 const FIT_CONTENT_REGEXP = /^fit-content\([^^)]+\)$/;
 const GRADIENT_REGEXP =
 	/^((repeating-linear|linear|radial|repeating-radial|conic|repeating-conic)-gradient)\(([^)]+)\)$/;
@@ -422,6 +422,16 @@ export default class CSSStyleDeclarationValueParser {
 	}
 
 	/**
+	 * Returns global initial value.
+	 *
+	 * @param value Value.
+	 * @returns Parsed value.
+	 */
+	public static isInitial(value: string): boolean {
+		return value.toLowerCase() === 'initial';
+	}
+
+	/**
 	 * Returns CSS variable.
 	 *
 	 * @param value Value.
@@ -444,6 +454,16 @@ export default class CSSStyleDeclarationValueParser {
 	public static getGlobal(value: string): string {
 		const lowerValue = value.toLowerCase();
 		return GLOBALS.includes(lowerValue) ? lowerValue : null;
+	}
+
+	/**
+	 * Returns global.
+	 *
+	 * @param value Value.
+	 * @returns Parsed value.
+	 */
+	public static isGlobal(value: string): boolean {
+		return GLOBALS.includes(value.toLowerCase());
 	}
 
 	/**

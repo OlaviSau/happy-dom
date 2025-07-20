@@ -58,14 +58,22 @@ export default class CSSStyleDeclaration {
 		const definedMembers = Object.getOwnPropertyNames(CSSStyleDeclaration.prototype);
 
 		return new Proxy(this, {
-			get(target: CSSStyleDeclaration, key: string | symbol | number) {
+			get(target: CSSStyleDeclaration, key: string | symbol | number, receiver: unknown) {
 				if (typeof key === 'number') {
 					return target.item(key) || undefined;
 				}
 				if (typeof key === 'string' && !definedMembers.includes(key)) {
-					this.getPropertyValue(target.#convertToCSSProperty(key));
+					target.getPropertyValue(target.#convertToCSSProperty(key));
 				}
-				return target[key];
+
+				const value = target[key];
+				if (value instanceof Function) {
+					return function (...args: unknown[]) {
+						return value.apply(this === receiver ? target : this, args);
+					};
+				}
+
+				return value;
 			},
 			set(target: CSSStyleDeclaration, key: string | symbol, value: string): boolean {
 				if (typeof key === 'string' && !definedMembers.includes(key)) {
@@ -137,35 +145,53 @@ export default class CSSStyleDeclaration {
 	 *
 	 * @param name Property name.
 	 * @param value Value. Must not contain "!important" as that should be set using the priority parameter.
-	 * @param [priority] Can be "important", or an empty string.
+	 * @param [priority] Can be "important", an empty string, null or undefined.
 	 */
-	public setProperty(name: string, value: string, priority?: 'important' | '' | undefined): void {
+	public setProperty(
+		name: string,
+		value: string | null,
+		priority?: string | '' | undefined | null
+	): void {
 		if (this.#computed) {
 			throw new this[PropertySymbol.window].DOMException(
 				`Failed to execute 'setProperty' on 'CSSStyleDeclaration': These styles are computed, and therefore the '${name}' property is read-only.`,
-				DOMExceptionNameEnum.domException
+				DOMExceptionNameEnum.noModificationAllowedError
 			);
 		}
 
-		if (priority !== '' && priority !== undefined && priority !== 'important') {
+		priority = typeof priority === 'string' ? priority.toLowerCase() : priority;
+
+		if (!['important', '', undefined, null].includes(priority)) {
+			// There are only 4 valid values for priority, other values will usually result in an immediate exit.
+			// The exception is in FireFox when the second argument value is an empty string or null.
+			// In that particular the value of the priority is ignored.
+			// This behavior does not exist in Chrome.
 			return;
 		}
 
-		const stringValue = String(value).trim();
-		const propertyManager = this.#getPropertyManager();
+		try {
+			const stringValue = String(value === null ? '' : value).trim();
 
-		if (stringValue) {
-			propertyManager.set(name, stringValue, !!priority);
-		} else {
-			propertyManager.remove(name);
-		}
+			const propertyManager = this.#getPropertyManager();
 
-		if (this.#element) {
-			this.#cache.attributeValue = propertyManager.toString();
-			if (this.#cache.attributeValue) {
-				this.#element.setAttribute('style', this.#cache.attributeValue);
+			if (stringValue) {
+				propertyManager.set(name, stringValue, !!priority);
 			} else {
-				this.#element.removeAttribute('style');
+				propertyManager.remove(name);
+			}
+			if (this.#element) {
+				this.#cache.attributeValue = propertyManager.toString();
+				if (this.#cache.attributeValue) {
+					this.#element.setAttribute('style', this.#cache.attributeValue);
+				} else {
+					this.#element.removeAttribute('style');
+				}
+			}
+		} catch (error) {
+			if (error instanceof TypeError) {
+				throw new TypeError(
+					`Failed to execute 'setProperty' on 'CSSStyleDeclaration': ${error.message}`
+				);
 			}
 		}
 	}
@@ -174,8 +200,6 @@ export default class CSSStyleDeclaration {
 	 * Removes a property.
 	 *
 	 * @param name Property name in kebab case.
-	 * @param value Value. Must not contain "!important" as that should be set using the priority parameter.
-	 * @param [priority] Can be "important", or an empty string.
 	 */
 	public removeProperty(name: string): void {
 		if (this.#computed) {
