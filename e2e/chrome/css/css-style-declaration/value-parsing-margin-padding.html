@@ -1,0 +1,78 @@
+<div id="margin-single"></div>
+<script>
+    const marginSingleEl = document.createElement("div");
+    marginSingleEl.style.margin = "10px";
+    document.querySelector("#margin-single").textContent = [
+        marginSingleEl.style.marginTop,
+        marginSingleEl.style.marginRight,
+        marginSingleEl.style.marginBottom,
+        marginSingleEl.style.marginLeft
+    ].join("|");
+</script>
+<div id="margin-two"></div>
+<script>
+    const marginTwoEl = document.createElement("div");
+    marginTwoEl.style.margin = "10px 20px";
+    document.querySelector("#margin-two").textContent = [
+        marginTwoEl.style.marginTop,
+        marginTwoEl.style.marginRight,
+        marginTwoEl.style.marginBottom,
+        marginTwoEl.style.marginLeft
+    ].join("|");
+</script>
+<div id="margin-four"></div>
+<script>
+    const marginFourEl = document.createElement("div");
+    marginFourEl.style.margin = "5px 10px 15px 20px";
+    document.querySelector("#margin-four").textContent = [
+        marginFourEl.style.marginTop,
+        marginFourEl.style.marginRight,
+        marginFourEl.style.marginBottom,
+        marginFourEl.style.marginLeft
+    ].join("|");
+</script>
+<div id="margin-auto"></div>
+<script>
+    const marginAutoEl = document.createElement("div");
+    marginAutoEl.style.margin = "auto";
+    document.querySelector("#margin-auto").textContent = [
+        marginAutoEl.style.marginTop,
+        marginAutoEl.style.marginRight,
+        marginAutoEl.style.marginBottom,
+        marginAutoEl.style.marginLeft
+    ].join("|");
+</script>
+<div id="margin-inherit"></div>
+<script>
+    const marginInheritEl = document.createElement("div");
+    marginInheritEl.style.margin = "inherit";
+    document.querySelector("#margin-inherit").textContent = marginInheritEl.style.margin;
+</script>
+<div id="padding-single"></div>
+<script>
+    const paddingSingleEl = document.createElement("div");
+    paddingSingleEl.style.padding = "8px";
+    document.querySelector("#padding-single").textContent = [
+        paddingSingleEl.style.paddingTop,
+        paddingSingleEl.style.paddingRight,
+        paddingSingleEl.style.paddingBottom,
+        paddingSingleEl.style.paddingLeft
+    ].join("|");
+</script>
+<div id="padding-two"></div>
+<script>
+    const paddingTwoEl = document.createElement("div");
+    paddingTwoEl.style.padding = "4px 8px";
+    document.querySelector("#padding-two").textContent = [
+        paddingTwoEl.style.paddingTop,
+        paddingTwoEl.style.paddingRight,
+        paddingTwoEl.style.paddingBottom,
+        paddingTwoEl.style.paddingLeft
+    ].join("|");
+</script>
+<div id="padding-invalid-auto"></div>
+<script>
+    const paddingInvalidEl = document.createElement("div");
+    paddingInvalidEl.style.padding = "auto";
+    document.querySelector("#padding-invalid-auto").textContent = JSON.stringify(paddingInvalidEl.style.padding);
+</script>

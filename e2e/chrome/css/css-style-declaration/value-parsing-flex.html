@@ -1,0 +1,72 @@
+<div id="flex-none"></div>
+<script>
+    const flexNoneEl = document.createElement("div");
+    flexNoneEl.style.flex = "none";
+    document.querySelector("#flex-none").textContent = [
+        flexNoneEl.style.flexGrow,
+        flexNoneEl.style.flexShrink,
+        flexNoneEl.style.flexBasis
+    ].join("|");
+</script>
+<div id="flex-auto"></div>
+<script>
+    const flexAutoEl = document.createElement("div");
+    flexAutoEl.style.flex = "auto";
+    document.querySelector("#flex-auto").textContent = [
+        flexAutoEl.style.flexGrow,
+        flexAutoEl.style.flexShrink,
+        flexAutoEl.style.flexBasis
+    ].join("|");
+</script>
+<div id="flex-single-number"></div>
+<script>
+    const flexSingleEl = document.createElement("div");
+    flexSingleEl.style.flex = "2";
+    document.querySelector("#flex-single-number").textContent = [
+        flexSingleEl.style.flexGrow,
+        flexSingleEl.style.flexShrink,
+        flexSingleEl.style.flexBasis
+    ].join("|");
+</script>
+<div id="flex-two-numbers"></div>
+<script>
+    const flexTwoEl = document.createElement("div");
+    flexTwoEl.style.flex = "1 2";
+    document.querySelector("#flex-two-numbers").textContent = [
+        flexTwoEl.style.flexGrow,
+        flexTwoEl.style.flexShrink,
+        flexTwoEl.style.flexBasis
+    ].join("|");
+</script>
+<div id="flex-three-values"></div>
+<script>
+    const flexThreeEl = document.createElement("div");
+    flexThreeEl.style.flex = "1 1 200px";
+    document.querySelector("#flex-three-values").textContent = [
+        flexThreeEl.style.flexGrow,
+        flexThreeEl.style.flexShrink,
+        flexThreeEl.style.flexBasis
+    ].join("|");
+</script>
+<div id="flex-basis-content"></div>
+<script>
+    const flexBasisContentEl = document.createElement("div");
+    flexBasisContentEl.style.flexBasis = "content";
+    document.querySelector("#flex-basis-content").textContent = flexBasisContentEl.style.flexBasis;
+</script>
+<div id="flex-basis-min-content"></div>
+<script>
+    const flexBasisMinEl = document.createElement("div");
+    flexBasisMinEl.style.flexBasis = "min-content";
+    document.querySelector("#flex-basis-min-content").textContent = flexBasisMinEl.style.flexBasis;
+</script>
+<div id="flex-inherit"></div>
+<script>
+    const flexInheritEl = document.createElement("div");
+    flexInheritEl.style.flex = "inherit";
+    document.querySelector("#flex-inherit").textContent = [
+        flexInheritEl.style.flexGrow,
+        flexInheritEl.style.flexShrink,
+        flexInheritEl.style.flexBasis
+    ].join("|");
+</script>

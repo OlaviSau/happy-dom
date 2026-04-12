@@ -1,0 +1,47 @@
+<div id="priority-important"></div>
+<script>
+    const priorityImportantEl = document.createElement("div");
+    priorityImportantEl.style.setProperty("color", "red", "important");
+    document.querySelector("#priority-important").textContent = [
+        "value=" + priorityImportantEl.style.getPropertyValue("color"),
+        "priority=" + priorityImportantEl.style.getPropertyPriority("color")
+    ].join("|");
+</script>
+<div id="priority-empty-string"></div>
+<script>
+    const priorityEmptyEl = document.createElement("div");
+    priorityEmptyEl.style.setProperty("color", "red", "");
+    document.querySelector("#priority-empty-string").textContent = priorityEmptyEl.style.getPropertyPriority("color");
+</script>
+<div id="priority-null-param"></div>
+<script>
+    const priorityNullEl = document.createElement("div");
+    priorityNullEl.style.setProperty("color", "blue", null);
+    document.querySelector("#priority-null-param").textContent = priorityNullEl.style.getPropertyPriority("color");
+</script>
+<div id="priority-undefined-param"></div>
+<script>
+    const priorityUndefEl = document.createElement("div");
+    priorityUndefEl.style.setProperty("color", "green", undefined);
+    document.querySelector("#priority-undefined-param").textContent = priorityUndefEl.style.getPropertyPriority("color");
+</script>
+<div id="priority-invalid"></div>
+<script>
+    const priorityInvalidEl = document.createElement("div");
+    priorityInvalidEl.style.setProperty("color", "red");
+    priorityInvalidEl.style.setProperty("color", "blue", "INVALID");
+    document.querySelector("#priority-invalid").textContent = priorityInvalidEl.style.getPropertyValue("color");
+</script>
+<div id="custom-property-set"></div>
+<script>
+    const customPropEl = document.createElement("div");
+    customPropEl.style.setProperty("--my-color", "red");
+    document.querySelector("#custom-property-set").textContent = customPropEl.style.getPropertyValue("--my-color");
+</script>
+<div id="custom-property-empty-remove"></div>
+<script>
+    const customPropRemoveEl = document.createElement("div");
+    customPropRemoveEl.style.setProperty("--x", "42");
+    customPropRemoveEl.style.setProperty("--x", "");
+    document.querySelector("#custom-property-empty-remove").textContent = JSON.stringify(customPropRemoveEl.style.getPropertyValue("--x"));
+</script>

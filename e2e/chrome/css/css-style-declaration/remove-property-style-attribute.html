@@ -1,0 +1,49 @@
+<div id="remove-last" style=""></div>
+<script>
+    const removeLast = document.querySelector("#remove-last");
+    removeLast.style.color = "red";
+    removeLast.style.removeProperty("color");
+</script>
+<div id="remove-one-of-two"></div>
+<script>
+    const removeOneOfTwo = document.querySelector("#remove-one-of-two");
+    removeOneOfTwo.style.color = "red";
+    removeOneOfTwo.style.display = "block";
+    removeOneOfTwo.style.removeProperty("color");
+</script>
+<div id="remove-return-value"></div>
+<script>
+    const removeReturnEl = document.createElement("div");
+    removeReturnEl.style.color = "red";
+    document.querySelector("#remove-return-value").textContent = removeReturnEl.style.removeProperty("color");
+</script>
+<div id="remove-nonexistent"></div>
+<script>
+    const removeNonexistentEl = document.createElement("div");
+    document.querySelector("#remove-nonexistent").textContent = JSON.stringify(removeNonexistentEl.style.removeProperty("color"));
+</script>
+<div id="remove-shorthand"></div>
+<script>
+    const removeShorthand = document.querySelector("#remove-shorthand");
+    removeShorthand.setAttribute("style", "margin: 10px; color: red;");
+    removeShorthand.style.removeProperty("margin");
+</script>
+<div id="get-after-remove"></div>
+<script>
+    const getAfterRemoveEl = document.createElement("div");
+    getAfterRemoveEl.style.color = "red";
+    getAfterRemoveEl.style.removeProperty("color");
+    document.querySelector("#get-after-remove").textContent = JSON.stringify(getAfterRemoveEl.style.getPropertyValue("color"));
+</script>
+<div id="remove-via-empty-assignment"></div>
+<script>
+    const removeViaEmpty = document.querySelector("#remove-via-empty-assignment");
+    removeViaEmpty.style.color = "red";
+    removeViaEmpty.style.color = "";
+</script>
+<div id="remove-border-radius-shorthand"></div>
+<script>
+    const removeBorderRadius = document.querySelector("#remove-border-radius-shorthand");
+    removeBorderRadius.setAttribute("style", "border-radius: 5px; color: blue;");
+    removeBorderRadius.style.removeProperty("border-radius");
+</script>

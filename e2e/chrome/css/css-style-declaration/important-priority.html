@@ -1,0 +1,41 @@
+<div id="get-priority-important"></div>
+<script>
+    const getPriorityEl = document.createElement("div");
+    getPriorityEl.setAttribute("style", "color: red !important;");
+    document.querySelector("#get-priority-important").textContent = getPriorityEl.style.getPropertyPriority("color");
+</script>
+<div id="get-priority-normal"></div>
+<script>
+    const getPriorityNormalEl = document.createElement("div");
+    getPriorityNormalEl.setAttribute("style", "color: red;");
+    document.querySelector("#get-priority-normal").textContent = getPriorityNormalEl.style.getPropertyPriority("color");
+</script>
+<div id="important-csstext-output"></div>
+<script>
+    const importantCssTextEl = document.createElement("div");
+    importantCssTextEl.style.setProperty("color", "red", "important");
+    document.querySelector("#important-csstext-output").textContent = importantCssTextEl.style.cssText;
+</script>
+<div id="important-wins-duplicate"></div>
+<script>
+    const importantWinsEl = document.createElement("div");
+    importantWinsEl.setAttribute("style", "color: blue; color: red !important;");
+    document.querySelector("#important-wins-duplicate").textContent = importantWinsEl.style.color;
+</script>
+<div id="remove-important"></div>
+<script>
+    const removeImportantEl = document.createElement("div");
+    removeImportantEl.setAttribute("style", "color: red !important; display: block;");
+    removeImportantEl.style.removeProperty("color");
+    document.querySelector("#remove-important").textContent = removeImportantEl.style.cssText;
+</script>
+<div id="normal-does-not-override-important"></div>
+<script>
+    const normalImportantEl = document.createElement("div");
+    normalImportantEl.style.setProperty("color", "red", "important");
+    normalImportantEl.style.setProperty("color", "blue");
+    document.querySelector("#normal-does-not-override-important").textContent = [
+        normalImportantEl.style.getPropertyValue("color"),
+        normalImportantEl.style.getPropertyPriority("color")
+    ].join("|");
+</script>

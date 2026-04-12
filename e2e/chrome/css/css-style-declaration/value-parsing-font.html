@@ -1,0 +1,78 @@
+<div id="font-size"></div>
+<script>
+    const fontSizeEl = document.createElement("div");
+    fontSizeEl.style.fontSize = "16px";
+    document.querySelector("#font-size").textContent = fontSizeEl.style.fontSize;
+</script>
+<div id="font-weight-numeric"></div>
+<script>
+    const fontWeightEl = document.createElement("div");
+    fontWeightEl.style.fontWeight = "700";
+    document.querySelector("#font-weight-numeric").textContent = fontWeightEl.style.fontWeight;
+</script>
+<div id="font-weight-keyword"></div>
+<script>
+    const fontWeightKwEl = document.createElement("div");
+    fontWeightKwEl.style.fontWeight = "bold";
+    document.querySelector("#font-weight-keyword").textContent = fontWeightKwEl.style.fontWeight;
+</script>
+<div id="font-size-em"></div>
+<script>
+    const fontSizeEmEl = document.createElement("div");
+    fontSizeEmEl.style.fontSize = "1.5em";
+    document.querySelector("#font-size-em").textContent = fontSizeEmEl.style.fontSize;
+</script>
+<div id="font-family-single"></div>
+<script>
+    const fontFamilySingleEl = document.createElement("div");
+    fontFamilySingleEl.style.fontFamily = "sans-serif";
+    document.querySelector("#font-family-single").textContent = fontFamilySingleEl.style.fontFamily;
+</script>
+<div id="font-family-quoted"></div>
+<script>
+    const fontFamilyQuotedEl = document.createElement("div");
+    fontFamilyQuotedEl.style.fontFamily = '"Times New Roman", serif';
+    document.querySelector("#font-family-quoted").textContent = fontFamilyQuotedEl.style.fontFamily;
+</script>
+<div id="font-family-unquoted-multi"></div>
+<script>
+    const fontFamilyUnquotedEl = document.createElement("div");
+    fontFamilyUnquotedEl.setAttribute("style", "font-family: Fira Sans, sans-serif;");
+    document.querySelector("#font-family-unquoted-multi").textContent = fontFamilyUnquotedEl.style.fontFamily;
+</script>
+<div id="font-style-italic"></div>
+<script>
+    const fontStyleItalicEl = document.createElement("div");
+    fontStyleItalicEl.style.fontStyle = "italic";
+    document.querySelector("#font-style-italic").textContent = fontStyleItalicEl.style.fontStyle;
+</script>
+<div id="font-style-oblique"></div>
+<script>
+    const fontStyleObliqueEl = document.createElement("div");
+    fontStyleObliqueEl.setAttribute("style", "font-style: oblique 10deg;");
+    document.querySelector("#font-style-oblique").textContent = fontStyleObliqueEl.style.fontStyle;
+</script>
+<div id="font-variant"></div>
+<script>
+    const fontVariantEl = document.createElement("div");
+    fontVariantEl.style.fontVariant = "small-caps";
+    document.querySelector("#font-variant").textContent = fontVariantEl.style.fontVariant;
+</script>
+<div id="font-shorthand-simple"></div>
+<script>
+    const fontShorthandEl = document.createElement("div");
+    fontShorthandEl.setAttribute("style", "font: bold 16px serif;");
+    document.querySelector("#font-shorthand-simple").textContent = fontShorthandEl.style.font;
+</script>
+<div id="font-shorthand-with-line-height"></div>
+<script>
+    const fontLineHeightEl = document.createElement("div");
+    fontLineHeightEl.setAttribute("style", "font: bold 16px/1.5 serif;");
+    document.querySelector("#font-shorthand-with-line-height").textContent = fontLineHeightEl.style.font;
+</script>
+<div id="font-inherit"></div>
+<script>
+    const fontInheritEl = document.createElement("div");
+    fontInheritEl.setAttribute("style", "font: inherit;");
+    document.querySelector("#font-inherit").textContent = fontInheritEl.style.font;
+</script>

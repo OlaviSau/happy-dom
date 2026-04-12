@@ -1,0 +1,37 @@
+<div id="external-setattr"></div>
+<script>
+    const externalSetAttrEl = document.querySelector("#external-setattr");
+    externalSetAttrEl.style.color = "red";
+    externalSetAttrEl.setAttribute("style", "color: blue;");
+    document.querySelector("#external-setattr").textContent = externalSetAttrEl.style.color;
+</script>
+<div id="external-removeattr"></div>
+<script>
+    const externalRemoveAttrEl = document.querySelector("#external-removeattr");
+    externalRemoveAttrEl.style.color = "red";
+    externalRemoveAttrEl.removeAttribute("style");
+    document.querySelector("#external-removeattr").textContent = externalRemoveAttrEl.style.color;
+</script>
+<div id="external-remove-length"></div>
+<script>
+    const externalRemoveLenEl = document.querySelector("#external-remove-length");
+    externalRemoveLenEl.style.color = "red";
+    externalRemoveLenEl.removeAttribute("style");
+    document.querySelector("#external-remove-length").textContent = String(externalRemoveLenEl.style.length);
+</script>
+<div id="external-empty-attr-length"></div>
+<script>
+    const externalEmptyAttrEl = document.querySelector("#external-empty-attr-length");
+    externalEmptyAttrEl.setAttribute("style", "");
+    document.querySelector("#external-empty-attr-length").textContent = String(externalEmptyAttrEl.style.length);
+</script>
+<div id="external-setattr-multi"></div>
+<script>
+    const externalMultiEl = document.querySelector("#external-setattr-multi");
+    externalMultiEl.style.color = "red";
+    externalMultiEl.setAttribute("style", "color: green; font-size: 12px;");
+    document.querySelector("#external-setattr-multi").textContent = [
+        externalMultiEl.style.color,
+        externalMultiEl.style.fontSize
+    ].join("|");
+</script>

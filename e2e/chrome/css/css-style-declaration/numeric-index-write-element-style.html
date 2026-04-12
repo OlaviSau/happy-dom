@@ -1,0 +1,13 @@
+<div id="write-to-index-zero"></div>
+<script>
+    const writeToIndexZero = document.querySelector("#write-to-index-zero");
+    writeToIndexZero.style.background = "red";
+    writeToIndexZero.style[0] = "color";
+    console.log("#write-to-index-zero.style[0]", writeToIndexZero.style["0"])
+</script>
+<div id="write-to-index-no-prior-style"></div>
+<script>
+    const writeToIndexNoPriorStyle = document.querySelector("#write-to-index-no-prior-style");
+    writeToIndexNoPriorStyle.style[0] = "color";
+    console.log("#write-to-index-no-prior-style.style[0]", writeToIndexNoPriorStyle.style["0"])
+</script>

@@ -1,0 +1,30 @@
+<div id="csstext-setter-normalization" style="display: block; color: red;"></div>
+
+<div id="csstext-getter-inline"></div>
+<script>
+    const csstextGetterEl = document.querySelector("#csstext-getter-inline");
+    csstextGetterEl.setAttribute("style", "color: red; display: block;");
+    document.querySelector("#csstext-getter-inline").textContent = csstextGetterEl.style.cssText;
+</script>
+<div id="csstext-set-via-setter"></div>
+<script>
+    const csstextSetterEl = document.querySelector("#csstext-set-via-setter");
+    csstextSetterEl.style.cssText = "color: blue; margin: 5px;";
+</script>
+<div id="csstext-empty-clears-style"></div>
+<script>
+    const csstextEmptyEl = document.querySelector("#csstext-empty-clears-style");
+    csstextEmptyEl.setAttribute("style", "color: red;");
+    csstextEmptyEl.style.cssText = "";
+</script>
+<div id="csstext-invalid-value"></div>
+<script>
+    const csstextInvalidEl = document.querySelector("#csstext-invalid-value");
+    csstextInvalidEl.setAttribute("style", "color: red;");
+    csstextInvalidEl.style.cssText = "not-a-css-property: 123;";
+</script>
+<div id="csstext-computed-style"></div>
+<script>
+    const csstextComputedEl = document.createElement("div");
+    document.querySelector("#csstext-computed-style").textContent = JSON.stringify(window.getComputedStyle(csstextComputedEl).cssText);
+</script>

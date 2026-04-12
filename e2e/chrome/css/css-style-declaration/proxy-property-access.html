@@ -1,0 +1,58 @@
+<div id="proxy-camel-set"></div>
+<script>
+    const proxyCamelSet = document.querySelector("#proxy-camel-set");
+    proxyCamelSet.style.backgroundColor = "blue";
+    proxyCamelSet.style.fontSize = "14px";
+</script>
+<div id="proxy-camel-get"></div>
+<script>
+    const proxyCamelGet = document.querySelector("#proxy-camel-get");
+    proxyCamelGet.setAttribute("style", "background-color: green; font-size: 18px;");
+    document.querySelector("#proxy-camel-get").textContent = [
+        proxyCamelGet.style.backgroundColor,
+        proxyCamelGet.style.fontSize
+    ].join("|");
+</script>
+<div id="proxy-kebab-get"></div>
+<script>
+    const proxyKebabGet = document.querySelector("#proxy-kebab-get");
+    proxyKebabGet.setAttribute("style", "background-color: purple; font-size: 10px;");
+    document.querySelector("#proxy-kebab-get").textContent = [
+        proxyKebabGet.style["background-color"],
+        proxyKebabGet.style["font-size"]
+    ].join("|");
+</script>
+<div id="proxy-numeric-index"></div>
+<script>
+    const proxyNumericIndex = document.querySelector("#proxy-numeric-index");
+    proxyNumericIndex.setAttribute("style", "color: red; display: block;");
+    document.querySelector("#proxy-numeric-index").textContent = [
+        proxyNumericIndex.style[0],
+        proxyNumericIndex.style[1]
+    ].join("|");
+</script>
+<div id="proxy-in-operator-known"></div>
+<script>
+    const proxyInKnown = document.createElement("div");
+    document.querySelector("#proxy-in-operator-known").textContent = [
+        String("color" in proxyInKnown.style),
+        String("backgroundColor" in proxyInKnown.style),
+        String("cssText" in proxyInKnown.style)
+    ].join("|");
+</script>
+<div id="proxy-in-operator-unknown"></div>
+<script>
+    const proxyInUnknown = document.createElement("div");
+    document.querySelector("#proxy-in-operator-unknown").textContent = String("notacssProp" in proxyInUnknown.style);
+</script>
+<div id="proxy-csstext-set" style="color: red; margin: 5px;"></div>
+<script>
+    const proxyCssTextSet = document.querySelector("#proxy-csstext-set");
+    proxyCssTextSet.style.cssText = "margin: 5px; color: red;";
+</script>
+<div id="proxy-numeric-write-noop"></div>
+<script>
+    const proxyNumericWrite = document.querySelector("#proxy-numeric-write-noop");
+    proxyNumericWrite.setAttribute("style", "color: red;");
+    proxyNumericWrite.style[0] = "blue";
+</script>

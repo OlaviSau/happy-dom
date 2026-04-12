@@ -1,0 +1,68 @@
+<div id="length-empty"></div>
+<script>
+    const lengthEmptyEl = document.createElement("div");
+    document.querySelector("#length-empty").textContent = String(lengthEmptyEl.style.length);
+</script>
+<div id="length-one-property"></div>
+<script>
+    const lengthOneEl = document.createElement("div");
+    lengthOneEl.style.color = "red";
+    document.querySelector("#length-one-property").textContent = String(lengthOneEl.style.length);
+</script>
+<div id="length-shorthand-expands"></div>
+<script>
+    const lengthShorthandEl = document.createElement("div");
+    lengthShorthandEl.style.margin = "10px";
+    document.querySelector("#length-shorthand-expands").textContent = String(lengthShorthandEl.style.length);
+</script>
+<div id="item-first"></div>
+<script>
+    const itemFirstEl = document.createElement("div");
+    itemFirstEl.setAttribute("style", "color: red; display: block;");
+    document.querySelector("#item-first").textContent = itemFirstEl.style.item(0);
+</script>
+<div id="item-second"></div>
+<script>
+    const itemSecondEl = document.createElement("div");
+    itemSecondEl.setAttribute("style", "color: red; display: block;");
+    document.querySelector("#item-second").textContent = itemSecondEl.style.item(1);
+</script>
+<div id="item-out-of-bounds"></div>
+<script>
+    const itemOobEl = document.createElement("div");
+    itemOobEl.style.color = "red";
+    document.querySelector("#item-out-of-bounds").textContent = JSON.stringify(itemOobEl.style.item(5));
+</script>
+<div id="item-negative"></div>
+<script>
+    const itemNegEl = document.createElement("div");
+    itemNegEl.style.color = "red";
+    document.querySelector("#item-negative").textContent = JSON.stringify(itemNegEl.style.item(-1));
+</script>
+<div id="numeric-bracket-access"></div>
+<script>
+    const numericBracketEl = document.createElement("div");
+    numericBracketEl.setAttribute("style", "color: red; display: block;");
+    document.querySelector("#numeric-bracket-access").textContent = [
+        numericBracketEl.style[0],
+        numericBracketEl.style[1]
+    ].join("|");
+</script>
+<div id="length-after-remove"></div>
+<script>
+    const lengthAfterRemoveEl = document.createElement("div");
+    lengthAfterRemoveEl.style.color = "red";
+    lengthAfterRemoveEl.style.display = "block";
+    lengthAfterRemoveEl.style.removeProperty("color");
+    document.querySelector("#length-after-remove").textContent = String(lengthAfterRemoveEl.style.length);
+</script>
+<div id="iteration-for-loop"></div>
+<script>
+    const iterationEl = document.createElement("div");
+    iterationEl.setAttribute("style", "color: red; display: block;");
+    const props = [];
+    for (let i = 0; i < iterationEl.style.length; i++) {
+        props.push(iterationEl.style.item(i));
+    }
+    document.querySelector("#iteration-for-loop").textContent = props.join("|");
+</script>

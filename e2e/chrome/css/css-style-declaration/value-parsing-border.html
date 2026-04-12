@@ -1,0 +1,75 @@
+<div id="border-shorthand"></div>
+<script>
+    const borderShortEl = document.createElement("div");
+    borderShortEl.style.border = "1px solid blue";
+    document.querySelector("#border-shorthand").textContent = [
+        borderShortEl.style.borderTopWidth,
+        borderShortEl.style.borderTopStyle,
+        borderShortEl.style.borderTopColor
+    ].join("|");
+</script>
+<div id="border-top-shorthand"></div>
+<script>
+    const borderTopEl = document.createElement("div");
+    borderTopEl.style.borderTop = "2px dashed red";
+    document.querySelector("#border-top-shorthand").textContent = [
+        borderTopEl.style.borderTopWidth,
+        borderTopEl.style.borderTopStyle,
+        borderTopEl.style.borderTopColor
+    ].join("|");
+</script>
+<div id="border-width-shorthand"></div>
+<script>
+    const borderWidthEl = document.createElement("div");
+    borderWidthEl.style.borderWidth = "1px 2px 3px 4px";
+    document.querySelector("#border-width-shorthand").textContent = [
+        borderWidthEl.style.borderTopWidth,
+        borderWidthEl.style.borderRightWidth,
+        borderWidthEl.style.borderBottomWidth,
+        borderWidthEl.style.borderLeftWidth
+    ].join("|");
+</script>
+<div id="border-style-shorthand"></div>
+<script>
+    const borderStyleEl = document.createElement("div");
+    borderStyleEl.style.borderStyle = "solid dashed";
+    document.querySelector("#border-style-shorthand").textContent = [
+        borderStyleEl.style.borderTopStyle,
+        borderStyleEl.style.borderRightStyle,
+        borderStyleEl.style.borderBottomStyle,
+        borderStyleEl.style.borderLeftStyle
+    ].join("|");
+</script>
+<div id="border-radius-shorthand"></div>
+<script>
+    const borderRadiusEl = document.createElement("div");
+    borderRadiusEl.style.borderRadius = "4px 8px";
+    document.querySelector("#border-radius-shorthand").textContent = [
+        borderRadiusEl.style.borderTopLeftRadius,
+        borderRadiusEl.style.borderTopRightRadius,
+        borderRadiusEl.style.borderBottomRightRadius,
+        borderRadiusEl.style.borderBottomLeftRadius
+    ].join("|");
+</script>
+<div id="border-color-named"></div>
+<script>
+    const borderColorNamedEl = document.createElement("div");
+    borderColorNamedEl.style.borderColor = "red";
+    document.querySelector("#border-color-named").textContent = [
+        borderColorNamedEl.style.borderTopColor,
+        borderColorNamedEl.style.borderRightColor,
+        borderColorNamedEl.style.borderBottomColor,
+        borderColorNamedEl.style.borderLeftColor
+    ].join("|");
+</script>
+<div id="border-color-mixed-named"></div>
+<script>
+    const borderColorMixedEl = document.createElement("div");
+    borderColorMixedEl.setAttribute("style", "border-color: red blue rgba(135, 200, 150, 0.5) green;");
+    document.querySelector("#border-color-mixed-named").textContent = [
+        borderColorMixedEl.style.borderTopColor,
+        borderColorMixedEl.style.borderRightColor,
+        borderColorMixedEl.style.borderBottomColor,
+        borderColorMixedEl.style.borderLeftColor
+    ].join("|");
+</script>

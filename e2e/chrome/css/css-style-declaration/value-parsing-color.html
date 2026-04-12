@@ -1,0 +1,53 @@
+<div id="color-named"></div>
+<script>
+    const colorNamedEl = document.createElement("div");
+    colorNamedEl.style.color = "red";
+    document.querySelector("#color-named").textContent = colorNamedEl.style.color;
+</script>
+<div id="color-rgb"></div>
+<script>
+    const colorRgbEl = document.createElement("div");
+    colorRgbEl.style.color = "rgb(255, 0, 0)";
+    document.querySelector("#color-rgb").textContent = colorRgbEl.style.color;
+</script>
+<div id="color-rgba"></div>
+<script>
+    const colorRgbaEl = document.createElement("div");
+    colorRgbaEl.style.color = "rgba(255, 0, 0, 0.5)";
+    document.querySelector("#color-rgba").textContent = colorRgbaEl.style.color;
+</script>
+<div id="color-transparent"></div>
+<script>
+    const colorTransparentEl = document.createElement("div");
+    colorTransparentEl.style.color = "transparent";
+    document.querySelector("#color-transparent").textContent = colorTransparentEl.style.color;
+</script>
+<div id="color-invalid"></div>
+<script>
+    const colorInvalidEl = document.createElement("div");
+    colorInvalidEl.style.color = "notacolor";
+    document.querySelector("#color-invalid").textContent = JSON.stringify(colorInvalidEl.style.color);
+</script>
+<div id="color-background-rgb"></div>
+<script>
+    const colorBgEl = document.createElement("div");
+    colorBgEl.style.backgroundColor = "rgb(0, 128, 0)";
+    document.querySelector("#color-background-rgb").textContent = colorBgEl.style.backgroundColor;
+</script>
+<div id="color-background-rgba"></div>
+<script>
+    const colorBgRgbaEl = document.createElement("div");
+    colorBgRgbaEl.style.backgroundColor = "rgba(0, 0, 255, 0.3)";
+    document.querySelector("#color-background-rgba").textContent = colorBgRgbaEl.style.backgroundColor;
+</script>
+<div id="color-border-color-named"></div>
+<script>
+    const colorBorderEl = document.createElement("div");
+    colorBorderEl.setAttribute("style", "border-color: red blue rgba(135, 200, 150, 0.5) green;");
+    document.querySelector("#color-border-color-named").textContent = [
+        colorBorderEl.style.borderTopColor,
+        colorBorderEl.style.borderRightColor,
+        colorBorderEl.style.borderBottomColor,
+        colorBorderEl.style.borderLeftColor
+    ].join("|");
+</script>

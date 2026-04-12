@@ -1,0 +1,34 @@
+<div id="set-only"></div>
+<script>
+    const setOnly = document.querySelector("#set-only");
+    setOnly.style.setProperty("background", "red");
+</script>
+<div id="set-only-null"></div>
+<script>
+    const setOnlyNull = document.querySelector("#set-only-null");
+    setOnlyNull.style.setProperty("background", null);
+</script>
+<div id="set-and-remove-null"></div>
+<script>
+    const setAndRemoveNull = document.querySelector("#set-and-remove-null");
+    setAndRemoveNull.style.setProperty("background", "red");
+    setAndRemoveNull.style.setProperty("background", null);
+</script>
+<div id="set-and-remove-false"></div>
+<script>
+    const setAndRemoveFalse = document.querySelector("#set-and-remove-false");
+    setAndRemoveFalse.style.setProperty("background", "red");
+    setAndRemoveFalse.style.setProperty("background", false);
+</script>
+<div id="set-and-remove-empty-string"></div>
+<script>
+    const setAndRemoveEmptyString = document.querySelector("#set-and-remove-empty-string");
+    setAndRemoveEmptyString.style.setProperty("background", "red");
+    setAndRemoveEmptyString.style.setProperty("background", "");
+</script>
+<div id="set-and-remove-undefined"></div>
+<script>
+    const setAndRemoveUndefined = document.querySelector("#set-and-remove-undefined");
+    setAndRemoveUndefined.style.setProperty("background", "red");
+    setAndRemoveUndefined.style.setProperty("background", undefined);
+</script>

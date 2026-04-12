@@ -1,0 +1,60 @@
+<div id="bg-color-only"></div>
+<script>
+    const bgColorEl = document.createElement("div");
+    bgColorEl.style.background = "red";
+    document.querySelector("#bg-color-only").textContent = bgColorEl.style.backgroundColor;
+</script>
+<div id="bg-image-unquoted-url"></div>
+<script>
+    const bgImageUnquotedEl = document.createElement("div");
+    bgImageUnquotedEl.setAttribute("style", 'background-image: url(test.jpg);');
+    document.querySelector("#bg-image-unquoted-url").textContent = bgImageUnquotedEl.style.backgroundImage;
+</script>
+<div id="bg-image-quoted-url"></div>
+<script>
+    const bgImageQuotedEl = document.createElement("div");
+    bgImageQuotedEl.setAttribute("style", 'background-image: url("test.jpg");');
+    document.querySelector("#bg-image-quoted-url").textContent = bgImageQuotedEl.style.backgroundImage;
+</script>
+<div id="bg-repeat-x"></div>
+<script>
+    const bgRepeatXEl = document.createElement("div");
+    bgRepeatXEl.style.backgroundRepeat = "repeat-x";
+    document.querySelector("#bg-repeat-x").textContent = bgRepeatXEl.style.backgroundRepeat;
+</script>
+<div id="bg-repeat-no-repeat"></div>
+<script>
+    const bgRepeatNoEl = document.createElement("div");
+    bgRepeatNoEl.style.backgroundRepeat = "no-repeat";
+    document.querySelector("#bg-repeat-no-repeat").textContent = bgRepeatNoEl.style.backgroundRepeat;
+</script>
+<div id="bg-position-center"></div>
+<script>
+    const bgPosCenterEl = document.createElement("div");
+    bgPosCenterEl.setAttribute("style", "background-position: center;");
+    document.querySelector("#bg-position-center").textContent = [
+        bgPosCenterEl.style.backgroundPositionX,
+        bgPosCenterEl.style.backgroundPositionY
+    ].join("|");
+</script>
+<div id="bg-position-xy"></div>
+<script>
+    const bgPosXYEl = document.createElement("div");
+    bgPosXYEl.setAttribute("style", "background-position: 30% 50%;");
+    document.querySelector("#bg-position-xy").textContent = [
+        bgPosXYEl.style.backgroundPositionX,
+        bgPosXYEl.style.backgroundPositionY
+    ].join("|");
+</script>
+<div id="bg-size"></div>
+<script>
+    const bgSizeEl = document.createElement("div");
+    bgSizeEl.style.backgroundSize = "cover";
+    document.querySelector("#bg-size").textContent = bgSizeEl.style.backgroundSize;
+</script>
+<div id="bg-attachment"></div>
+<script>
+    const bgAttachEl = document.createElement("div");
+    bgAttachEl.style.backgroundAttachment = "fixed";
+    document.querySelector("#bg-attachment").textContent = bgAttachEl.style.backgroundAttachment;
+</script>
