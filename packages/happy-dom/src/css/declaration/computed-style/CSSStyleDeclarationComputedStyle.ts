@@ -22,7 +22,7 @@ import type CSSSupportsRule from '../../rules/CSSSupportsRule.js';
 import CSSScopeRule from '../../rules/CSSScopeRule.js';
 import type CSSStyleSheet from '../../CSSStyleSheet.js';
 
-const CSS_MEASUREMENT_REGEXP = /[0-9.]+(px|rem|em|vw|vh|%|vmin|vmax|cm|mm|in|pt|pc|Q)/g;
+const CSS_MEASUREMENT_REGEXP = /[0-9.]+(px|rem|em|vw|vh|%|vmin|vmax|cm|mm|in|pt|pc|[Qq])/g;
 const HOST_REGEXP = /:host\s*\(([^)]+)\)|:host-context\s*\(([^)]+)\)/;
 const SINGLE_CSS_VARIABLE_REGEXP = /var\( *(--[^), ]+)\)/;
 const CSS_VARIABLE_REGEXP = /var\( *(--[^), ]+), *([^), ]+)\)/;

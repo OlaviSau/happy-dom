@@ -1,6 +1,3 @@
-## What is a conformance test for happy-dom?
-A conformance test is a simple HTML file that can be opened in a browser to examine the actual behavior for given functionality.
-
 ## Naming and Structure
 The conformance test only applies to a given browser since the behaviors can be different between browsers.
 Perhaps at some point versioning will be needed as well, but for now it's just separated by browsers.

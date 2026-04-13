@@ -39,6 +39,10 @@
 		"test:circular-dependencies": {
 			"dependsOn": ["^compile"],
 			"inputs": ["lib/**"]
+		},
+		"e2e#test": {
+			"dependsOn": ["happy-dom#compile"],
+			"inputs": ["test/**", "vitest.config.ts", "package.json"]
 		}
 	}
 }

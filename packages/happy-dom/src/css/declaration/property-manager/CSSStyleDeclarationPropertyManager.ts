@@ -1,29 +1,100 @@
+/**
+ * AUTO-GENERATED FILE — DO NOT EDIT
+ *
+ * Derived from Chromium Blink rendering engine property data.
+ * Source: https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink
+ */
+
 import type ICSSStyleDeclarationPropertyValue from './ICSSStyleDeclarationPropertyValue.js';
 import CSSStyleDeclarationPropertySetParser from './CSSStyleDeclarationPropertySetParser.js';
-import CSSStyleDeclarationValueParser from './CSSStyleDeclarationValueParser.js';
 import CSSStyleDeclarationPropertyGetParser from './CSSStyleDeclarationPropertyGetParser.js';
 import CSSStyleDeclarationCSSParser from '../css-parser/CSSStyleDeclarationCSSParser.js';
+import { CSS_SHORTHAND_TO_LONGHANDS } from '../property-definitions/CSSShorthandDefinitions.js';
+import { CSS_ALIAS_TO_CANONICAL } from '../property-definitions/CSSAliasDefinitions.js';
 
-const TO_STRING_SHORTHAND_PROPERTIES = [
-	['margin'],
-	['padding'],
-	['border', ['border-width', 'border-style', 'border-color', 'border-image']],
-	['border-radius'],
-	['background', 'background-position'],
-	['font']
+/**
+ * Shorthands that toString() will attempt to collapse longhands into.
+ */
+const COLLAPSE_SHORTHANDS = [
+	'margin',
+	'padding',
+	'border',
+	'border-width',
+	'border-style',
+	'border-color',
+	'border-image',
+	'border-radius',
+	'outline',
+	'flex',
+	'flex-flow',
+	'overflow',
+	'gap',
+	'place-content',
+	'place-items',
+	'place-self',
+	'background',
+	'font',
+	'text-decoration',
+	'list-style',
+	'columns',
+	'overscroll-behavior',
+	'inset',
+	'margin-block',
+	'margin-inline',
+	'padding-block',
+	'padding-inline',
+	'inset-block',
+	'inset-inline',
+	'scroll-margin',
+	'scroll-padding',
+	'border-top',
+	'border-right',
+	'border-bottom',
+	'border-left',
+	'font-variant'
 ];
 
 /**
- * Computed this.properties property parser.
+ * Pre-built reverse map: longhand property name → list of collapsible shorthands
+ * (in COLLAPSE_SHORTHANDS priority order) that include that longhand.
+ * Built once at module load to avoid recomputing on every toString() call.
+ */
+const LONGHAND_TO_COLLAPSE_SHORTHANDS = new Map<string, string[]>();
+for (const shorthand of COLLAPSE_SHORTHANDS) {
+	const lhs = CSS_SHORTHAND_TO_LONGHANDS[shorthand];
+	if (!lhs) {
+		continue;
+	}
+	for (const lh of lhs) {
+		if (!LONGHAND_TO_COLLAPSE_SHORTHANDS.has(lh)) {
+			LONGHAND_TO_COLLAPSE_SHORTHANDS.set(lh, []);
+		}
+		LONGHAND_TO_COLLAPSE_SHORTHANDS.get(lh)!.push(shorthand);
+	}
+}
+
+/**
+ * Manages CSS property storage. Only longhands are stored internally.
+ *
+ * Orchestrates all behavioral contracts:
+ * - B1: set() decomposes shorthands via SetParser
+ * - B2: get() recomposes shorthands via GetParser
+ * - B3: Longhand override naturally invalidates shorthands (consequence of B2)
+ * - B4: remove() clears longhands (all for shorthand, one for longhand)
+ * - B6: Invalid values are silently ignored (SetParser returns null)
+ * - B7: Empty value removes property
+ * - B8: Priority propagates through shorthand expansion
+ * - B9: toString() collapses longhands into shorthands
+ * - B10: length/item track stored longhands
+ * - B12: Custom properties (--*) stored alongside standard properties
+ * - B13: Aliases resolved to canonical names
  */
 export default class CSSStyleDeclarationPropertyManager {
-	public properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	} = {};
-	private definedPropertyNames: { [k: string]: boolean } = {};
+	#properties: Record<string, ICSSStyleDeclarationPropertyValue> = {};
+	#propertyNames: string[] = [];
 
 	/**
-	 * Class construtor.
+	 * Constructor.
 	 *
 	 * @param [options] Options.
 	 * @param [options.cssText] CSS string.
@@ -40,53 +111,70 @@ export default class CSSStyleDeclarationPropertyManager {
 	}
 
 	/**
+	 * Returns the underlying property store (used by computed style).
+	 */
+	public get properties(): Record<string, ICSSStyleDeclarationPropertyValue> {
+		return this.#properties;
+	}
+
+	/**
 	 * Returns property value.
 	 *
 	 * @param name Property name.
 	 * @returns Property value.
 	 */
 	public get(name: string): ICSSStyleDeclarationPropertyValue | null {
-		if (this.properties[name]) {
-			return this.properties[name];
-		}
-		switch (name) {
-			case 'margin':
-				return CSSStyleDeclarationPropertyGetParser.getMargin(this.properties);
-			case 'padding':
-				return CSSStyleDeclarationPropertyGetParser.getPadding(this.properties);
-			case 'border':
-				return CSSStyleDeclarationPropertyGetParser.getBorder(this.properties);
-			case 'border-top':
-				return CSSStyleDeclarationPropertyGetParser.getBorderTop(this.properties);
-			case 'border-right':
-				return CSSStyleDeclarationPropertyGetParser.getBorderRight(this.properties);
-			case 'border-bottom':
-				return CSSStyleDeclarationPropertyGetParser.getBorderBottom(this.properties);
-			case 'border-left':
-				return CSSStyleDeclarationPropertyGetParser.getBorderLeft(this.properties);
-			case 'border-color':
-				return CSSStyleDeclarationPropertyGetParser.getBorderColor(this.properties);
-			case 'border-style':
-				return CSSStyleDeclarationPropertyGetParser.getBorderStyle(this.properties);
-			case 'border-width':
-				return CSSStyleDeclarationPropertyGetParser.getBorderWidth(this.properties);
-			case 'border-radius':
-				return CSSStyleDeclarationPropertyGetParser.getBorderRadius(this.properties);
-			case 'border-image':
-				return CSSStyleDeclarationPropertyGetParser.getBorderImage(this.properties);
-			case 'outline':
-				return CSSStyleDeclarationPropertyGetParser.getOutline(this.properties);
-			case 'background':
-				return CSSStyleDeclarationPropertyGetParser.getBackground(this.properties);
-			case 'background-position':
-				return CSSStyleDeclarationPropertyGetParser.getBackgroundPosition(this.properties);
-			case 'flex':
-				return CSSStyleDeclarationPropertyGetParser.getFlex(this.properties);
-			case 'font':
-				return CSSStyleDeclarationPropertyGetParser.getFont(this.properties);
+		// Resolve alias (B13)
+		const canonical = CSS_ALIAS_TO_CANONICAL[name] ?? name;
+
+		// Direct longhand lookup
+		if (this.#properties[canonical]) {
+			return this.#properties[canonical];
 		}
 
-		return this.properties[name] || null;
+		// Shorthand recomposition (B2)
+		const longhands = CSS_SHORTHAND_TO_LONGHANDS[canonical];
+		if (longhands) {
+			return CSSStyleDeclarationPropertyGetParser.get(canonical, this.#properties);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Sets a property value.
+	 *
+	 * @param name Property name.
+	 * @param value Property value.
+	 * @param important Whether the value has !important.
+	 */
+	public set(name: string, value: string, important: boolean): void {
+		// Resolve alias (B13)
+		const canonical = CSS_ALIAS_TO_CANONICAL[name] ?? name;
+
+		// Empty value removes (B7)
+		if (value === null || value === undefined || value.trim() === '') {
+			this.remove(canonical);
+			return;
+		}
+
+		// Parse and validate (B1, B6)
+		const parsed = CSSStyleDeclarationPropertySetParser.parse(canonical, value, important);
+
+		// Invalid value — silently ignore (B6)
+		if (!parsed) {
+			return;
+		}
+
+		// Store the resulting longhands
+		for (const [propName, propValue] of Object.entries(parsed)) {
+			if (propValue) {
+				if (!this.#properties[propName]) {
+					this.#propertyNames.push(propName);
+				}
+				this.#properties[propName] = propValue;
+			}
+		}
 	}
 
 	/**
@@ -95,454 +183,59 @@ export default class CSSStyleDeclarationPropertyManager {
 	 * @param name Property name.
 	 */
 	public remove(name: string): void {
-		delete this.properties[name];
-		delete this.definedPropertyNames[name];
+		// Resolve alias
+		const canonical = CSS_ALIAS_TO_CANONICAL[name] ?? name;
 
-		switch (name) {
-			case 'border':
-				delete this.properties['border-top-width'];
-				delete this.properties['border-right-width'];
-				delete this.properties['border-bottom-width'];
-				delete this.properties['border-left-width'];
-				delete this.properties['border-top-style'];
-				delete this.properties['border-right-style'];
-				delete this.properties['border-bottom-style'];
-				delete this.properties['border-left-style'];
-				delete this.properties['border-top-color'];
-				delete this.properties['border-right-color'];
-				delete this.properties['border-bottom-color'];
-				delete this.properties['border-left-color'];
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
-				break;
-			case 'border-top':
-				delete this.properties['border-top-width'];
-				delete this.properties['border-top-style'];
-				delete this.properties['border-top-color'];
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
-				break;
-			case 'border-right':
-				delete this.properties['border-right-width'];
-				delete this.properties['border-right-style'];
-				delete this.properties['border-right-color'];
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
-				break;
-			case 'border-bottom':
-				delete this.properties['border-bottom-width'];
-				delete this.properties['border-bottom-style'];
-				delete this.properties['border-bottom-color'];
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
-				break;
-			case 'border-left':
-				delete this.properties['border-left-width'];
-				delete this.properties['border-left-style'];
-				delete this.properties['border-left-color'];
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
-				break;
-			case 'border-width':
-				delete this.properties['border-top-width'];
-				delete this.properties['border-right-width'];
-				delete this.properties['border-bottom-width'];
-				delete this.properties['border-left-width'];
-				break;
-			case 'border-style':
-				delete this.properties['border-top-style'];
-				delete this.properties['border-right-style'];
-				delete this.properties['border-bottom-style'];
-				delete this.properties['border-left-style'];
-				break;
-			case 'border-color':
-				delete this.properties['border-top-color'];
-				delete this.properties['border-right-color'];
-				delete this.properties['border-bottom-color'];
-				delete this.properties['border-left-color'];
-				break;
-			case 'border-image':
-				delete this.properties['border-image-source'];
-				delete this.properties['border-image-slice'];
-				delete this.properties['border-image-width'];
-				delete this.properties['border-image-outset'];
-				delete this.properties['border-image-repeat'];
-				break;
-			case 'border-radius':
-				delete this.properties['border-top-left-radius'];
-				delete this.properties['border-top-right-radius'];
-				delete this.properties['border-bottom-right-radius'];
-				delete this.properties['border-bottom-left-radius'];
-				break;
-			case 'outline':
-				delete this.properties['outline-color'];
-				delete this.properties['outline-style'];
-				delete this.properties['outline-width'];
-				break;
-			case 'background':
-				delete this.properties['background-color'];
-				delete this.properties['background-image'];
-				delete this.properties['background-repeat'];
-				delete this.properties['background-attachment'];
-				delete this.properties['background-position-x'];
-				delete this.properties['background-position-y'];
-				delete this.properties['background-size'];
-				delete this.properties['background-origin'];
-				delete this.properties['background-clip'];
-				break;
-			case 'background-position':
-				delete this.properties['background-position-x'];
-				delete this.properties['background-position-y'];
-				break;
-			case 'flex':
-				delete this.properties['flex-grow'];
-				delete this.properties['flex-shrink'];
-				delete this.properties['flex-basis'];
-				break;
-			case 'font':
-				delete this.properties['font-style'];
-				delete this.properties['font-variant'];
-				delete this.properties['font-weight'];
-				delete this.properties['font-stretch'];
-				delete this.properties['font-size'];
-				delete this.properties['line-height'];
-				delete this.properties['font-family'];
-				break;
-			case 'padding':
-				delete this.properties['padding-top'];
-				delete this.properties['padding-right'];
-				delete this.properties['padding-bottom'];
-				delete this.properties['padding-left'];
-				break;
-			case 'margin':
-				delete this.properties['margin-top'];
-				delete this.properties['margin-right'];
-				delete this.properties['margin-bottom'];
-				delete this.properties['margin-left'];
-				break;
-		}
-	}
-
-	/**
-	 * Sets a property
-	 *
-	 * @param name Name.
-	 * @param value Value.
-	 * @param important Important.
-	 */
-	public set(name: string, value: string, important: boolean): void {
-		if (value === null) {
-			this.remove(name);
-			return;
-		}
-
-		let properties = null;
-
-		switch (name) {
-			case 'border':
-				properties = CSSStyleDeclarationPropertySetParser.getBorder(value, important);
-				break;
-			case 'border-top':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderTop(value, important);
-				break;
-			case 'border-right':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderRight(value, important);
-				break;
-			case 'border-bottom':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderBottom(value, important);
-				break;
-			case 'border-left':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderLeft(value, important);
-				break;
-			case 'border-width':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderWidth(value, important);
-				break;
-			case 'border-style':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderStyle(value, important);
-				break;
-			case 'border-color':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderColor(value, important);
-				break;
-			case 'border-image':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderImage(value, important);
-				break;
-			case 'border-image-source':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderImageSource(value, important);
-				break;
-			case 'border-image-slice':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderImageSlice(value, important);
-				break;
-			case 'border-image-width':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderImageWidth(value, important);
-				break;
-			case 'border-image-outset':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderImageOutset(value, important);
-				break;
-			case 'border-image-repeat':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderImageRepeat(value, important);
-				break;
-			case 'border-top-width':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderTopWidth(value, important);
-				break;
-			case 'border-right-width':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderRightWidth(value, important);
-				break;
-			case 'border-bottom-width':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderBottomWidth(value, important);
-				break;
-			case 'border-left-width':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderLeftWidth(value, important);
-				break;
-			case 'border-top-color':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderTopColor(value, important);
-				break;
-			case 'border-right-color':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderRightColor(value, important);
-				break;
-			case 'border-bottom-color':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderBottomColor(value, important);
-				break;
-			case 'border-left-color':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderLeftColor(value, important);
-				break;
-			case 'border-top-style':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderTopStyle(value, important);
-				break;
-			case 'border-right-style':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderRightStyle(value, important);
-				break;
-			case 'border-bottom-style':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderBottomStyle(value, important);
-				break;
-			case 'border-left-style':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderLeftStyle(value, important);
-				break;
-			case 'border-radius':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderRadius(value, important);
-				break;
-			case 'border-top-left-radius':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderTopLeftRadius(value, important);
-				break;
-			case 'border-top-right-radius':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderTopRightRadius(value, important);
-				break;
-			case 'border-bottom-right-radius':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderBottomRightRadius(
-					value,
-					important
-				);
-				break;
-			case 'border-bottom-left-radius':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderBottomLeftRadius(
-					value,
-					important
-				);
-				break;
-			case 'border-collapse':
-				properties = CSSStyleDeclarationPropertySetParser.getBorderCollapse(value, important);
-				break;
-			case 'outline':
-				properties = CSSStyleDeclarationPropertySetParser.getOutline(value, important);
-				break;
-			case 'outline-width':
-				properties = CSSStyleDeclarationPropertySetParser.getOutlineWidth(value, important);
-				break;
-			case 'outline-style':
-				properties = CSSStyleDeclarationPropertySetParser.getOutlineStyle(value, important);
-				break;
-			case 'outline-color':
-				properties = CSSStyleDeclarationPropertySetParser.getOutlineColor(value, important);
-				break;
-			case 'letter-spacing':
-				properties = CSSStyleDeclarationPropertySetParser.getLetterSpacing(value, important);
-				break;
-			case 'word-spacing':
-				properties = CSSStyleDeclarationPropertySetParser.getWordSpacing(value, important);
-				break;
-			case 'clear':
-				properties = CSSStyleDeclarationPropertySetParser.getClear(value, important);
-				break;
-			case 'clip':
-				properties = CSSStyleDeclarationPropertySetParser.getClip(value, important);
-				break;
-			case 'css-float':
-				properties = CSSStyleDeclarationPropertySetParser.getCSSFloat(value, important);
-				break;
-			case 'float':
-				properties = CSSStyleDeclarationPropertySetParser.getFloat(value, important);
-				break;
-			case 'display':
-				properties = CSSStyleDeclarationPropertySetParser.getDisplay(value, important);
-				break;
-			case 'direction':
-				properties = CSSStyleDeclarationPropertySetParser.getDirection(value, important);
-				break;
-			case 'flex':
-				properties = CSSStyleDeclarationPropertySetParser.getFlex(value, important);
-				break;
-			case 'flex-shrink':
-				properties = CSSStyleDeclarationPropertySetParser.getFlexShrink(value, important);
-				break;
-			case 'flex-grow':
-				properties = CSSStyleDeclarationPropertySetParser.getFlexGrow(value, important);
-				break;
-			case 'flex-basis':
-				properties = CSSStyleDeclarationPropertySetParser.getFlexBasis(value, important);
-				break;
-			case 'padding':
-				properties = CSSStyleDeclarationPropertySetParser.getPadding(value, important);
-				break;
-			case 'padding-top':
-				properties = CSSStyleDeclarationPropertySetParser.getPaddingTop(value, important);
-				break;
-			case 'padding-right':
-				properties = CSSStyleDeclarationPropertySetParser.getPaddingRight(value, important);
-				break;
-			case 'padding-bottom':
-				properties = CSSStyleDeclarationPropertySetParser.getPaddingBottom(value, important);
-				break;
-			case 'padding-left':
-				properties = CSSStyleDeclarationPropertySetParser.getPaddingLeft(value, important);
-				break;
-			case 'margin':
-				properties = CSSStyleDeclarationPropertySetParser.getMargin(value, important);
-				break;
-			case 'margin-top':
-				properties = CSSStyleDeclarationPropertySetParser.getMarginTop(value, important);
-				break;
-			case 'margin-right':
-				properties = CSSStyleDeclarationPropertySetParser.getMarginRight(value, important);
-				break;
-			case 'margin-bottom':
-				properties = CSSStyleDeclarationPropertySetParser.getMarginBottom(value, important);
-				break;
-			case 'margin-left':
-				properties = CSSStyleDeclarationPropertySetParser.getMarginLeft(value, important);
-				break;
-			case 'background':
-				properties = CSSStyleDeclarationPropertySetParser.getBackground(value, important);
-				break;
-			case 'background-image':
-				properties = CSSStyleDeclarationPropertySetParser.getBackgroundImage(value, important);
-				break;
-			case 'background-color':
-				properties = CSSStyleDeclarationPropertySetParser.getBackgroundColor(value, important);
-				break;
-			case 'background-repeat':
-				properties = CSSStyleDeclarationPropertySetParser.getBackgroundRepeat(value, important);
-				break;
-			case 'background-attachment':
-				properties = CSSStyleDeclarationPropertySetParser.getBackgroundAttachment(value, important);
-				break;
-			case 'background-position':
-				properties = CSSStyleDeclarationPropertySetParser.getBackgroundPosition(value, important);
-				break;
-			case 'width':
-				properties = CSSStyleDeclarationPropertySetParser.getWidth(value, important);
-				break;
-			case 'height':
-				properties = CSSStyleDeclarationPropertySetParser.getHeight(value, important);
-				break;
-			case 'top':
-				properties = CSSStyleDeclarationPropertySetParser.getTop(value, important);
-				break;
-			case 'right':
-				properties = CSSStyleDeclarationPropertySetParser.getRight(value, important);
-				break;
-			case 'bottom':
-				properties = CSSStyleDeclarationPropertySetParser.getBottom(value, important);
-				break;
-			case 'left':
-				properties = CSSStyleDeclarationPropertySetParser.getLeft(value, important);
-				break;
-			case 'font':
-				properties = CSSStyleDeclarationPropertySetParser.getFont(value, important);
-				break;
-			case 'font-style':
-				properties = CSSStyleDeclarationPropertySetParser.getFontStyle(value, important);
-				break;
-			case 'font-variant':
-				properties = CSSStyleDeclarationPropertySetParser.getFontVariant(value, important);
-				break;
-			case 'font-weight':
-				properties = CSSStyleDeclarationPropertySetParser.getFontWeight(value, important);
-				break;
-			case 'font-stretch':
-				properties = CSSStyleDeclarationPropertySetParser.getFontStretch(value, important);
-				break;
-			case 'font-size':
-				properties = CSSStyleDeclarationPropertySetParser.getFontSize(value, important);
-				break;
-			case 'line-height':
-				properties = CSSStyleDeclarationPropertySetParser.getLineHeight(value, important);
-				break;
-			case 'text-indent':
-				properties = CSSStyleDeclarationPropertySetParser.getTextIndent(value, important);
-				break;
-			case 'font-family':
-				properties = CSSStyleDeclarationPropertySetParser.getFontFamily(value, important);
-				break;
-			case 'color':
-				properties = CSSStyleDeclarationPropertySetParser.getColor(value, important);
-				break;
-			case 'flood-color':
-				properties = CSSStyleDeclarationPropertySetParser.getFloodColor(value, important);
-				break;
-			case 'text-transform':
-				properties = CSSStyleDeclarationPropertySetParser.getTextTransform(value, important);
-				break;
-			case 'visibility':
-				properties = CSSStyleDeclarationPropertySetParser.getVisibility(value, important);
-				break;
-			case 'aspect-ratio':
-				properties = CSSStyleDeclarationPropertySetParser.getAspectRatio(value, important);
-				break;
-
-			default:
-				const trimmedValue = value.trim();
-				if (trimmedValue) {
-					const globalValue = CSSStyleDeclarationValueParser.getGlobal(trimmedValue);
-					properties = {
-						[name]: { value: globalValue || trimmedValue, important }
-					};
+		// Check if it's a shorthand — remove all longhands (B4)
+		const longhands = CSS_SHORTHAND_TO_LONGHANDS[canonical];
+		if (longhands) {
+			for (const lh of longhands) {
+				delete this.#properties[lh];
+				const idx = this.#propertyNames.indexOf(lh);
+				if (idx !== -1) {
+					this.#propertyNames.splice(idx, 1);
 				}
-				break;
+				// Also recursively remove if this longhand is itself a shorthand
+				const subLonghands = CSS_SHORTHAND_TO_LONGHANDS[lh];
+				if (subLonghands) {
+					for (const sub of subLonghands) {
+						delete this.#properties[sub];
+						const subIdx = this.#propertyNames.indexOf(sub);
+						if (subIdx !== -1) {
+							this.#propertyNames.splice(subIdx, 1);
+						}
+					}
+				}
+			}
 		}
 
-		if (properties !== null && Object.keys(properties).length > 0) {
-			this.definedPropertyNames[name] = true;
-			Object.assign(this.properties, properties);
+		// Special case: parseFont() stores 'font-variant' as a direct property key,
+		// but CSS_SHORTHAND_TO_LONGHANDS['font'] only lists font-variant-* sub-properties.
+		// Explicitly remove font-variant when removing the font shorthand.
+		if (canonical === 'font') {
+			delete this.#properties['font-variant'];
+			const fvIdx = this.#propertyNames.indexOf('font-variant');
+			if (fvIdx !== -1) {
+				this.#propertyNames.splice(fvIdx, 1);
+			}
+		}
+
+		// Remove the property itself (longhand or custom property)
+		delete this.#properties[canonical];
+		const idx = this.#propertyNames.indexOf(canonical);
+		if (idx !== -1) {
+			this.#propertyNames.splice(idx, 1);
 		}
 	}
 
 	/**
-	 * Returns a clone.
+	 * Returns item.
 	 *
-	 * @returns Clone.
+	 * @param index Index.
+	 * @returns Item.
 	 */
-	public clone(): CSSStyleDeclarationPropertyManager {
-		const _class = <typeof CSSStyleDeclarationPropertyManager>this.constructor;
-		const clone: CSSStyleDeclarationPropertyManager = new _class();
-
-		clone.properties = JSON.parse(JSON.stringify(this.properties));
-		clone.definedPropertyNames = Object.assign({}, this.definedPropertyNames);
-
-		return clone;
+	public item(index: number): string {
+		return this.#propertyNames[index] || '';
 	}
 
 	/**
@@ -551,78 +244,61 @@ export default class CSSStyleDeclarationPropertyManager {
 	 * @returns Size.
 	 */
 	public size(): number {
-		return Object.keys(this.properties).length;
+		return this.#propertyNames.length;
 	}
 
 	/**
-	 * Returns property name.
+	 * Returns CSS text.
 	 *
-	 * @param index Index.
-	 * @returns Property name.
-	 */
-	public item(index: number): string {
-		return Object.keys(this.properties)[index] || '';
-	}
-
-	/**
-	 * Converts properties to string.
-	 *
-	 * @returns String.
+	 * @returns CSS text.
 	 */
 	public toString(): string {
-		const result = [];
-		const clone = this.clone();
-		const properties: { [k: string]: ICSSStyleDeclarationPropertyValue } = {};
+		const used = new Set<string>();
+		const parts: string[] = [];
 
-		for (const shorthandPropertyGroup of TO_STRING_SHORTHAND_PROPERTIES) {
-			for (const shorthandProperty of shorthandPropertyGroup) {
-				if (Array.isArray(shorthandProperty)) {
-					let isMatch = false;
-					for (const childShorthandProperty of shorthandProperty) {
-						const property = clone.get(childShorthandProperty);
-						if (property) {
-							properties[childShorthandProperty] = property;
-							clone.remove(childShorthandProperty);
-							isMatch = true;
+		for (const name of this.#propertyNames) {
+			if (used.has(name)) {
+				continue;
+			}
+
+			// Try to collapse this longhand into a shorthand, checking candidates in
+			// COLLAPSE_SHORTHANDS priority order (most-general first).
+			const candidateShorthands = LONGHAND_TO_COLLAPSE_SHORTHANDS.get(name);
+			let collapsed = false;
+
+			if (candidateShorthands) {
+				for (const shorthand of candidateShorthands) {
+					const longhands = CSS_SHORTHAND_TO_LONGHANDS[shorthand];
+					if (!longhands) {
+						continue;
+					}
+					if (!longhands.every((lh) => this.#properties[lh] && !used.has(lh))) {
+						continue;
+					}
+					const composed = CSSStyleDeclarationPropertyGetParser.get(shorthand, this.#properties);
+					if (composed) {
+						for (const lh of longhands) {
+							used.add(lh);
 						}
-					}
-					if (isMatch) {
-						break;
-					}
-				} else {
-					const property = clone.get(shorthandProperty);
-					if (property) {
-						properties[shorthandProperty] = property;
-						clone.remove(shorthandProperty);
+						const imp = composed.important ? ' !important' : '';
+						parts.push(`${shorthand}: ${composed.value}${imp};`);
+						collapsed = true;
 						break;
 					}
 				}
 			}
-		}
 
-		for (const name of Object.keys(clone.properties)) {
-			properties[name] = clone.get(name)!;
-		}
-
-		for (const definedPropertyName of Object.keys(this.definedPropertyNames)) {
-			const property = properties[definedPropertyName];
-			if (property) {
-				result.push(
-					`${definedPropertyName}: ${property.value}${property.important ? ' !important' : ''};`
-				);
-				delete properties[definedPropertyName];
+			if (!collapsed) {
+				used.add(name);
+				const prop = this.#properties[name];
+				if (!prop) {
+					continue;
+				}
+				const imp = prop.important ? ' !important' : '';
+				parts.push(`${name}: ${prop.value}${imp};`);
 			}
 		}
 
-		for (const propertyName of Object.keys(properties)) {
-			const property = properties[propertyName];
-			if (property) {
-				result.push(
-					`${propertyName}: ${property.value}${property.important ? ' !important' : ''};`
-				);
-			}
-		}
-
-		return result.join(' ');
+		return parts.join(' ');
 	}
 }

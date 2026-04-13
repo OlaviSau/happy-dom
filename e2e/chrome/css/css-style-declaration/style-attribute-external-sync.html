@@ -7,17 +7,17 @@
 </script>
 <div id="external-removeattr"></div>
 <script>
-    const externalRemoveAttrEl = document.querySelector("#external-removeattr");
-    externalRemoveAttrEl.style.color = "red";
-    externalRemoveAttrEl.removeAttribute("style");
-    document.querySelector("#external-removeattr").textContent = externalRemoveAttrEl.style.color;
+    const externalRemoveAttrWork = document.createElement("div");
+    externalRemoveAttrWork.style.color = "red";
+    externalRemoveAttrWork.removeAttribute("style");
+    document.querySelector("#external-removeattr").textContent = externalRemoveAttrWork.style.color;
 </script>
 <div id="external-remove-length"></div>
 <script>
-    const externalRemoveLenEl = document.querySelector("#external-remove-length");
-    externalRemoveLenEl.style.color = "red";
-    externalRemoveLenEl.removeAttribute("style");
-    document.querySelector("#external-remove-length").textContent = String(externalRemoveLenEl.style.length);
+    const externalRemoveLenWork = document.createElement("div");
+    externalRemoveLenWork.style.color = "red";
+    externalRemoveLenWork.removeAttribute("style");
+    document.querySelector("#external-remove-length").textContent = String(externalRemoveLenWork.style.length);
 </script>
 <div id="external-empty-attr-length"></div>
 <script>

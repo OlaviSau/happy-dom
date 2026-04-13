@@ -61,6 +61,7 @@ export default class CSSMeasurementConverter {
 			case 'pc':
 				return this.round(value * 16);
 			case 'Q':
+			case 'q':
 				return this.round(value * 0.945);
 			default:
 				return null;

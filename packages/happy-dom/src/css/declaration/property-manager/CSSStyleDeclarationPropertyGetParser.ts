@@ -1,794 +1,824 @@
-import CSSStyleDeclarationValueParser from './CSSStyleDeclarationValueParser.js';
+/**
+ * AUTO-GENERATED FILE — DO NOT EDIT
+ *
+ * Derived from Chromium Blink rendering engine property data.
+ * Source: https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink
+ */
+
 import type ICSSStyleDeclarationPropertyValue from './ICSSStyleDeclarationPropertyValue.js';
+import { CSS_SHORTHAND_TO_LONGHANDS } from '../property-definitions/CSSShorthandDefinitions.js';
+
+type PropertyStore = Record<string, ICSSStyleDeclarationPropertyValue | undefined>;
 
 /**
- * Computed style property parser.
+ * Recomposes shorthand CSS values from their constituent longhands (B2).
+ *
+ * Rules:
+ * - ALL longhands must be set for the shorthand to return a value
+ * - If any longhand is missing, return null
+ * - Collapse to shortest valid form where possible
+ * - B3 (invalidation) is a natural consequence: if longhands diverge,
+ * the shorthand returns null
  */
 export default class CSSStyleDeclarationPropertyGetParser {
 	/**
-	 * Returns margin.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
+	 * CSS-wide keywords that should collapse to a single value in shorthands.
 	 */
-	public static getMargin(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		return this.getPaddingLikeProperty(
-			['margin-top', 'margin-right', 'margin-bottom', 'margin-left'],
-			properties
-		);
-	}
+	private static readonly globalKeywords = new Set([
+		'inherit',
+		'initial',
+		'unset',
+		'revert',
+		'revert-layer'
+	]);
 
 	/**
-	 * Returns padding.
+	 * Get a shorthand property value from its longhands.
 	 *
-	 * @param properties Properties.
-	 * @returns Property value
+	 * @param name Shorthand property name.
+	 * @param properties The property store (longhand values).
+	 * @returns The composed shorthand value, or null if incomplete.
 	 */
-	public static getPadding(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		return this.getPaddingLikeProperty(
-			['padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
-			properties
-		);
-	}
-
-	/**
-	 * Returns outline.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getOutline(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		if (
-			!properties['outline-color']?.value ||
-			!properties['outline-style']?.value ||
-			!properties['outline-width']?.value
-		) {
-			return null;
-		}
-
-		const important =
-			properties['outline-color'].important &&
-			properties['outline-style'].important &&
-			properties['outline-width'].important;
-
-		if (
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(properties['outline-width'].value) &&
-			properties['outline-width'].value === properties['outline-style'].value &&
-			properties['outline-width'].value === properties['outline-color'].value
-		) {
-			return {
-				important,
-				value: properties['outline-width'].value
-			};
-		}
-
-		const values = [];
-
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['outline-color']?.value)) {
-			values.push(properties['outline-color'].value);
-		}
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['outline-style']?.value)) {
-			values.push(properties['outline-style'].value);
-		}
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['outline-width'].value)) {
-			values.push(properties['outline-width'].value);
-		}
-
-		return {
-			important,
-			value: values.join(' ')
-		};
-	}
-
-	/**
-	 * Returns border.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBorder(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		if (
-			!properties['border-top-width']?.value ||
-			properties['border-top-width']?.value !== properties['border-right-width']?.value ||
-			properties['border-top-width']?.value !== properties['border-bottom-width']?.value ||
-			properties['border-top-width']?.value !== properties['border-left-width']?.value ||
-			!properties['border-top-style']?.value ||
-			properties['border-top-style']?.value !== properties['border-right-style']?.value ||
-			properties['border-top-style']?.value !== properties['border-bottom-style']?.value ||
-			properties['border-top-style']?.value !== properties['border-left-style']?.value ||
-			!properties['border-top-color']?.value ||
-			properties['border-top-color']?.value !== properties['border-right-color']?.value ||
-			properties['border-top-color']?.value !== properties['border-bottom-color']?.value ||
-			properties['border-top-color']?.value !== properties['border-left-color']?.value ||
-			!properties['border-image-source']?.value ||
-			!properties['border-image-slice']?.value ||
-			!properties['border-image-width']?.value ||
-			!properties['border-image-outset']?.value ||
-			!properties['border-image-repeat']?.value
-		) {
-			return null;
-		}
-
-		const important =
-			properties['border-top-width'].important &&
-			properties['border-right-width'].important &&
-			properties['border-bottom-width'].important &&
-			properties['border-left-width'].important &&
-			properties['border-top-style'].important &&
-			properties['border-right-style'].important &&
-			properties['border-bottom-style'].important &&
-			properties['border-left-style'].important &&
-			properties['border-top-color'].important &&
-			properties['border-right-color'].important &&
-			properties['border-bottom-color'].important &&
-			properties['border-left-color'].important &&
-			properties['border-image-source'].important &&
-			properties['border-image-slice'].important &&
-			properties['border-image-width'].important &&
-			properties['border-image-outset'].important &&
-			properties['border-image-repeat'].important;
-
-		if (
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(properties['border-top-width'].value) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(properties['border-top-style'].value) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(properties['border-top-color'].value) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(
-				properties['border-image-source'].value
-			) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(
-				properties['border-image-slice'].value
-			) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(
-				properties['border-image-width'].value
-			) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(
-				properties['border-image-outset'].value
-			) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(properties['border-image-repeat'].value)
-		) {
-			if (
-				properties['border-top-width'].value !== properties['border-top-style'].value ||
-				properties['border-top-width'].value !== properties['border-top-color'].value ||
-				properties['border-top-width'].value !== properties['border-image-source'].value ||
-				properties['border-top-width'].value !== properties['border-image-slice'].value ||
-				properties['border-top-width'].value !== properties['border-image-width'].value ||
-				properties['border-top-width'].value !== properties['border-image-outset'].value ||
-				properties['border-top-width'].value !== properties['border-image-repeat'].value
-			) {
-				return null;
-			}
-
-			return {
-				important,
-				value: properties['border-top-width'].value
-			};
-		}
-
-		const values = [];
-
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['border-top-width'].value)) {
-			values.push(properties['border-top-width'].value);
-		}
-
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['border-top-style'].value)) {
-			values.push(properties['border-top-style'].value);
-		}
-
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['border-top-color'].value)) {
-			values.push(properties['border-top-color'].value);
-		}
-
-		return {
-			important,
-			value: values.join(' ')
-		};
-	}
-
-	/**
-	 * Returns border.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBorderTop(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		return this.getBorderTopRightBottomLeft('top', properties);
-	}
-
-	/**
-	 * Returns border.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBorderRight(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		return this.getBorderTopRightBottomLeft('right', properties);
-	}
-
-	/**
-	 * Returns border.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBorderBottom(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		return this.getBorderTopRightBottomLeft('bottom', properties);
-	}
-
-	/**
-	 * Returns border.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBorderLeft(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		return this.getBorderTopRightBottomLeft('left', properties);
-	}
-
-	/**
-	 * Returns border.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBorderColor(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		return this.getPaddingLikeProperty(
-			['border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'],
-			properties
-		);
-	}
-
-	/**
-	 * Returns border.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBorderWidth(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		return this.getPaddingLikeProperty(
-			['border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width'],
-			properties
-		);
-	}
-
-	/**
-	 * Returns border.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBorderStyle(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		return this.getPaddingLikeProperty(
-			['border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style'],
-			properties
-		);
-	}
-
-	/**
-	 * Returns border radius.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBorderRadius(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		return this.getPaddingLikeProperty(
-			[
-				'border-top-left-radius',
-				'border-top-right-radius',
-				'border-bottom-right-radius',
-				'border-bottom-left-radius'
-			],
-			properties
-		);
-	}
-
-	/**
-	 * Returns border image.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBorderImage(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		if (
-			!properties['border-image-source']?.value ||
-			!properties['border-image-slice']?.value ||
-			!properties['border-image-width']?.value ||
-			!properties['border-image-outset']?.value ||
-			!properties['border-image-repeat']?.value
-		) {
-			return null;
-		}
-
-		const important =
-			properties['border-image-source'].important &&
-			properties['border-image-slice'].important &&
-			properties['border-image-width'].important &&
-			properties['border-image-outset'].important &&
-			properties['border-image-repeat'].important;
-
-		if (
-			CSSStyleDeclarationValueParser.getGlobal(properties['border-image-source'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['border-image-slice'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['border-image-width'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['border-image-outset'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['border-image-repeat'].value)
-		) {
-			if (
-				properties['border-image-source'].value !== properties['border-image-slice'].value ||
-				properties['border-image-source'].value !== properties['border-image-width'].value ||
-				properties['border-image-source'].value !== properties['border-image-outset'].value ||
-				properties['border-image-source'].value !== properties['border-image-repeat'].value
-			) {
-				return null;
-			}
-			return {
-				important,
-				value: properties['border-image-source'].value
-			};
-		}
-
-		return {
-			important,
-			value: `${properties['border-image-source'].value} ${properties['border-image-slice'].value} / ${properties['border-image-width'].value} / ${properties['border-image-outset'].value} ${properties['border-image-repeat'].value}`
-		};
-	}
-
-	/**
-	 * Returns background.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBackground(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		if (
-			!properties['background-image']?.value ||
-			!properties['background-repeat']?.value ||
-			!properties['background-attachment']?.value ||
-			!properties['background-position-x']?.value ||
-			!properties['background-position-y']?.value ||
-			!properties['background-color']?.value ||
-			!properties['background-size']?.value ||
-			!properties['background-origin']?.value ||
-			!properties['background-clip']?.value
-		) {
-			return null;
-		}
-
-		const important =
-			properties['background-image'].important &&
-			properties['background-repeat'].important &&
-			properties['background-attachment'].important &&
-			properties['background-position-x'].important &&
-			properties['background-position-y'].important &&
-			properties['background-color'].important &&
-			properties['background-size'].important &&
-			properties['background-origin'].important &&
-			properties['background-clip'].important;
-
-		if (
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(properties['background-image'].value) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(
-				properties['background-repeat'].value
-			) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(
-				properties['background-attachment'].value
-			) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(
-				properties['background-position-x'].value
-			) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(
-				properties['background-position-y'].value
-			) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(properties['background-color'].value) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(properties['background-size'].value) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(
-				properties['background-origin'].value
-			) ||
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(properties['background-clip'].value)
-		) {
-			if (
-				properties['background-image'].value !== properties['background-repeat'].value ||
-				properties['background-image'].value !== properties['background-attachment'].value ||
-				properties['background-image'].value !== properties['background-position-x'].value ||
-				properties['background-image'].value !== properties['background-position-y'].value ||
-				properties['background-image'].value !== properties['background-color'].value ||
-				properties['background-image'].value !== properties['background-size'].value ||
-				properties['background-image'].value !== properties['background-origin'].value ||
-				properties['background-image'].value !== properties['background-clip'].value
-			) {
-				return null;
-			}
-
-			return {
-				important,
-				value: properties['background-image'].value
-			};
-		}
-
-		const values = [];
-
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['background-image'].value)) {
-			values.push(properties['background-image'].value);
-		}
-
-		if (
-			!CSSStyleDeclarationValueParser.getInitial(properties['background-position-x'].value) &&
-			!CSSStyleDeclarationValueParser.getInitial(properties['background-position-y'].value) &&
-			!CSSStyleDeclarationValueParser.getInitial(properties['background-size'].value)
-		) {
-			values.push(
-				`${properties['background-position-x'].value} ${properties['background-position-y'].value} / ${properties['background-size'].value}`
-			);
-		} else if (
-			!CSSStyleDeclarationValueParser.getInitial(properties['background-position-x'].value) &&
-			!CSSStyleDeclarationValueParser.getInitial(properties['background-position-y'].value)
-		) {
-			values.push(
-				`${properties['background-position-x'].value} ${properties['background-position-y'].value}`
-			);
-		}
-
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['background-repeat'].value)) {
-			values.push(properties['background-repeat'].value);
-		}
-
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['background-attachment'].value)) {
-			values.push(properties['background-attachment'].value);
-		}
-
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['background-origin'].value)) {
-			values.push(properties['background-origin'].value);
-		}
-
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['background-clip'].value)) {
-			values.push(properties['background-clip'].value);
-		}
-
-		if (!CSSStyleDeclarationValueParser.getInitial(properties['background-color'].value)) {
-			values.push(properties['background-color'].value);
-		}
-
-		return {
-			important,
-			value: values.join(' ')
-		};
-	}
-
-	/**
-	 * Returns background position.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getBackgroundPosition(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		if (
-			!properties['background-position-x']?.value ||
-			!properties['background-position-y']?.value
-		) {
-			return null;
-		}
-
-		const important =
-			properties['background-position-x'].important &&
-			properties['background-position-y'].important;
-		if (
-			CSSStyleDeclarationValueParser.getGlobal(properties['background-position-x'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['background-position-y'].value)
-		) {
-			if (properties['background-position-x'].value !== properties['background-position-y'].value) {
-				return null;
-			}
-
-			return {
-				important,
-				value: properties['background-position-x'].value
-			};
-		}
-
-		const positionX = properties['background-position-x'].value.replace(/ *, */g, ',').split(',');
-		const positionY = properties['background-position-y'].value.replace(/ *, */g, ',').split(',');
-		const parts = [];
-
-		for (let i = 0; i < positionX.length; i++) {
-			parts.push(`${positionX[i]} ${positionY[i]}`);
-		}
-
-		return {
-			important,
-			value: parts.join(', ')
-		};
-	}
-
-	/**
-	 * Returns flex.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getFlex(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		if (
-			!properties['flex-grow']?.value ||
-			!properties['flex-shrink']?.value ||
-			!properties['flex-basis']?.value
-		) {
-			return null;
-		}
-
-		const important =
-			properties['flex-grow'].important &&
-			properties['flex-shrink'].important &&
-			properties['flex-basis'].important;
-
-		if (
-			CSSStyleDeclarationValueParser.getGlobal(properties['flex-grow'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['flex-shrink'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['flex-basis'].value)
-		) {
-			if (
-				properties['flex-grow'].value !== properties['flex-shrink'].value ||
-				properties['flex-grow'].value !== properties['flex-basis'].value
-			) {
-				return null;
-			}
-
-			return {
-				important,
-				value: properties['flex-grow'].value
-			};
-		}
-
-		return {
-			important,
-			value: `${properties['flex-grow'].value} ${properties['flex-shrink'].value} ${properties['flex-basis'].value}`
-		};
-	}
-
-	/**
-	 * Returns flex.
-	 *
-	 * @param properties Properties.
-	 * @returns Property value
-	 */
-	public static getFont(properties: {
-		[k: string]: ICSSStyleDeclarationPropertyValue;
-	}): ICSSStyleDeclarationPropertyValue | null {
-		if (
-			!properties['font-size']?.value ||
-			!properties['font-family']?.value ||
-			!properties['font-weight']?.value ||
-			!properties['font-style']?.value ||
-			!properties['font-variant']?.value ||
-			!properties['font-stretch']?.value ||
-			!properties['line-height']?.value
-		) {
-			return null;
-		}
-
-		const important =
-			properties['font-size'].important &&
-			properties['font-family'].important &&
-			properties['font-weight'].important &&
-			properties['font-style'].important &&
-			properties['font-variant'].important &&
-			properties['font-stretch'].important &&
-			properties['line-height'].important;
-
-		if (
-			CSSStyleDeclarationValueParser.getGlobal(properties['font-size'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['font-family'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['font-weight'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['font-style'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['font-variant'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['font-stretch'].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties['line-height'].value)
-		) {
-			if (
-				properties['font-size'].value !== properties['font-family'].value ||
-				properties['font-size'].value !== properties['font-weight'].value ||
-				properties['font-size'].value !== properties['font-style'].value ||
-				properties['font-size'].value !== properties['font-variant'].value ||
-				properties['font-size'].value !== properties['font-stretch'].value ||
-				properties['font-size'].value !== properties['line-height'].value
-			) {
-				return null;
-			}
-
-			return {
-				important,
-				value: properties['font-size'].value
-			};
-		}
-
-		const values = [];
-
-		if (properties['font-style'].value !== 'normal') {
-			values.push(properties['font-style'].value);
-		}
-		if (properties['font-variant'].value !== 'normal') {
-			values.push(properties['font-variant'].value);
-		}
-		if (properties['font-weight'].value !== 'normal') {
-			values.push(properties['font-weight'].value);
-		}
-		if (properties['font-stretch'].value !== 'normal') {
-			values.push(properties['font-stretch'].value);
-		}
-
-		if (properties['line-height'].value !== 'normal') {
-			values.push(`${properties['font-size'].value} / ${properties['line-height'].value}`);
-		} else {
-			values.push(properties['font-size'].value);
-		}
-
-		values.push(properties['font-family'].value);
-
-		return {
-			important,
-			value: values.join(' ')
-		};
-	}
-
-	/**
-	 * Returns border.
-	 *
-	 * @param properties Properties.
-	 * @param position
-	 * @returns Property value
-	 */
-	private static getBorderTopRightBottomLeft(
-		position: 'top' | 'right' | 'bottom' | 'left',
-		properties: {
-			[k: string]: ICSSStyleDeclarationPropertyValue;
-		}
+	public static get(
+		name: string,
+		properties: PropertyStore
 	): ICSSStyleDeclarationPropertyValue | null {
-		if (
-			!properties[`border-${position}-width`]?.value ||
-			!properties[`border-${position}-style`]?.value ||
-			!properties[`border-${position}-color`]?.value
-		) {
-			return null;
-		}
+		switch (name) {
+			case 'margin':
+				return this.getBoxModel(
+					properties,
+					'margin-top',
+					'margin-right',
+					'margin-bottom',
+					'margin-left'
+				);
+			case 'padding':
+				return this.getBoxModel(
+					properties,
+					'padding-top',
+					'padding-right',
+					'padding-bottom',
+					'padding-left'
+				);
+			case 'inset':
+				return this.getBoxModel(properties, 'top', 'right', 'bottom', 'left');
+			case 'scroll-margin':
+				return this.getBoxModel(
+					properties,
+					'scroll-margin-top',
+					'scroll-margin-right',
+					'scroll-margin-bottom',
+					'scroll-margin-left'
+				);
+			case 'scroll-padding':
+				return this.getBoxModel(
+					properties,
+					'scroll-padding-top',
+					'scroll-padding-right',
+					'scroll-padding-bottom',
+					'scroll-padding-left'
+				);
 
-		const important =
-			properties[`border-${position}-width`].important &&
-			properties[`border-${position}-style`].important &&
-			properties[`border-${position}-color`].important;
+			case 'margin-block':
+				return this.getTwoValue(properties, 'margin-block-start', 'margin-block-end');
+			case 'margin-inline':
+				return this.getTwoValue(properties, 'margin-inline-start', 'margin-inline-end');
+			case 'padding-block':
+				return this.getTwoValue(properties, 'padding-block-start', 'padding-block-end');
+			case 'padding-inline':
+				return this.getTwoValue(properties, 'padding-inline-start', 'padding-inline-end');
+			case 'inset-block':
+				return this.getTwoValue(properties, 'inset-block-start', 'inset-block-end');
+			case 'inset-inline':
+				return this.getTwoValue(properties, 'inset-inline-start', 'inset-inline-end');
+			case 'scroll-margin-block':
+				return this.getTwoValue(properties, 'scroll-margin-block-start', 'scroll-margin-block-end');
+			case 'scroll-margin-inline':
+				return this.getTwoValue(
+					properties,
+					'scroll-margin-inline-start',
+					'scroll-margin-inline-end'
+				);
+			case 'scroll-padding-block':
+				return this.getTwoValue(
+					properties,
+					'scroll-padding-block-start',
+					'scroll-padding-block-end'
+				);
+			case 'scroll-padding-inline':
+				return this.getTwoValue(
+					properties,
+					'scroll-padding-inline-start',
+					'scroll-padding-inline-end'
+				);
 
-		if (
-			CSSStyleDeclarationValueParser.getGlobalExceptInitial(
-				properties[`border-${position}-width`].value
-			) &&
-			properties[`border-${position}-width`].value ===
-				properties[`border-${position}-style`].value &&
-			properties[`border-${position}-width`].value === properties[`border-${position}-color`].value
-		) {
-			return {
-				important,
-				value: properties[`border-${position}-width`].value
-			};
-		}
+			case 'border':
+				return this.getBorder(properties);
+			case 'border-top':
+				return this.getBorderSide(
+					properties,
+					'border-top-width',
+					'border-top-style',
+					'border-top-color'
+				);
+			case 'border-right':
+				return this.getBorderSide(
+					properties,
+					'border-right-width',
+					'border-right-style',
+					'border-right-color'
+				);
+			case 'border-bottom':
+				return this.getBorderSide(
+					properties,
+					'border-bottom-width',
+					'border-bottom-style',
+					'border-bottom-color'
+				);
+			case 'border-left':
+				return this.getBorderSide(
+					properties,
+					'border-left-width',
+					'border-left-style',
+					'border-left-color'
+				);
+			case 'border-width':
+				return this.getBoxModel(
+					properties,
+					'border-top-width',
+					'border-right-width',
+					'border-bottom-width',
+					'border-left-width'
+				);
+			case 'border-style':
+				return this.getBoxModel(
+					properties,
+					'border-top-style',
+					'border-right-style',
+					'border-bottom-style',
+					'border-left-style'
+				);
+			case 'border-color':
+				return this.getBoxModel(
+					properties,
+					'border-top-color',
+					'border-right-color',
+					'border-bottom-color',
+					'border-left-color'
+				);
+			case 'border-image':
+				return this.getBorderImage(properties);
+			case 'border-radius':
+				return this.getBorderRadius(properties);
 
-		const values = [];
+			case 'flex':
+				return this.getFlex(properties);
+			case 'flex-flow':
+				return this.getTwoValue(properties, 'flex-direction', 'flex-wrap');
+			case 'outline':
+				return this.getBorderSide(properties, 'outline-width', 'outline-style', 'outline-color');
+			case 'overflow':
+				return this.getTwoValue(properties, 'overflow-x', 'overflow-y');
+			case 'overscroll-behavior':
+				return this.getTwoValue(properties, 'overscroll-behavior-x', 'overscroll-behavior-y');
+			case 'gap':
+				return this.getTwoValue(properties, 'row-gap', 'column-gap');
+			case 'place-content':
+				return this.getTwoValue(properties, 'align-content', 'justify-content');
+			case 'place-items':
+				return this.getTwoValue(properties, 'align-items', 'justify-items');
+			case 'place-self':
+				return this.getTwoValue(properties, 'align-self', 'justify-self');
+			case 'columns':
+				return this.getColumns(properties);
+			case 'list-style':
+				return this.getListStyle(properties);
+			case 'text-decoration':
+				return this.getTextDecoration(properties);
+			case 'font':
+				return this.getFont(properties);
+			case 'background':
+				return this.getBackground(properties);
+			case 'background-position':
+				return this.getBackgroundPositionValue(
+					properties,
+					'background-position-x',
+					'background-position-y'
+				);
 
-		if (!CSSStyleDeclarationValueParser.getInitial(properties[`border-${position}-width`].value)) {
-			values.push(properties[`border-${position}-width`].value);
+			default:
+				return this.getGeneric(name, properties);
 		}
-		if (!CSSStyleDeclarationValueParser.getInitial(properties[`border-${position}-style`]?.value)) {
-			values.push(properties[`border-${position}-style`].value);
-		}
-		if (!CSSStyleDeclarationValueParser.getInitial(properties[`border-${position}-color`]?.value)) {
-			values.push(properties[`border-${position}-color`].value);
-		}
-
-		return {
-			important,
-			value: values.join(' ')
-		};
 	}
 
 	/**
-	 * Returns a padding like property.
+	 * If all values are the same CSS-wide keyword, return that keyword.
+	 * Otherwise return null (no collapse).
 	 *
-	 * @param properties Properties.
-	 * @param position
-	 * @param propertyNames
-	 * @returns Property value
+	 * @param values Array of CSS values.
+	 * @param important Whether values are !important.
+	 * @returns Collapsed value or null.
 	 */
-	private static getPaddingLikeProperty(
-		propertyNames: [string, string, string, string],
-		properties: {
-			[k: string]: ICSSStyleDeclarationPropertyValue;
-		}
+	private static collapseGlobal(
+		values: string[],
+		important: boolean
 	): ICSSStyleDeclarationPropertyValue | null {
+		if (values.length === 0) {
+			return null;
+		}
+		const first = values[0];
+		if (!this.globalKeywords.has(first)) {
+			return null;
+		}
+		if (values.every((v) => v === first)) {
+			return { value: first, important };
+		}
+		return null;
+	}
+
+	/**
+	 * Box model: 4 values collapsing to 1/2/3/4 form.
+	 *
+	 * @param props The property store.
+	 * @param topProp Top property name.
+	 * @param rightProp Right property name.
+	 * @param bottomProp Bottom property name.
+	 * @param leftProp Left property name.
+	 * @returns Collapsed value or null.
+	 */
+	private static getBoxModel(
+		props: PropertyStore,
+		topProp: string,
+		rightProp: string,
+		bottomProp: string,
+		leftProp: string
+	): ICSSStyleDeclarationPropertyValue | null {
+		const top = props[topProp];
+		const right = props[rightProp];
+		const bottom = props[bottomProp];
+		const left = props[leftProp];
+		if (!top || !right || !bottom || !left) {
+			return null;
+		}
+
+		// Check importance is consistent
+		const imp = top.important;
+		if (right.important !== imp || bottom.important !== imp || left.important !== imp) {
+			return null;
+		}
+
+		// Collapse
+		if (top.value === right.value && right.value === bottom.value && bottom.value === left.value) {
+			return { value: top.value, important: imp };
+		}
+		if (top.value === bottom.value && right.value === left.value) {
+			return { value: `${top.value} ${right.value}`, important: imp };
+		}
+		if (right.value === left.value) {
+			return { value: `${top.value} ${right.value} ${bottom.value}`, important: imp };
+		}
+		return { value: `${top.value} ${right.value} ${bottom.value} ${left.value}`, important: imp };
+	}
+
+	/**
+	 * Two-value shorthand collapsing.
+	 *
+	 * @param props The property store.
+	 * @param prop1 First property name.
+	 * @param prop2 Second property name.
+	 * @returns Collapsed value or null.
+	 */
+	/**
+	 * Background position: always outputs both X and Y even if identical.
+	 *
+	 * @param props The property store.
+	 * @param xProp X property name.
+	 * @param yProp Y property name.
+	 * @returns Composed value or null.
+	 */
+	private static getBackgroundPositionValue(
+		props: PropertyStore,
+		xProp: string,
+		yProp: string
+	): ICSSStyleDeclarationPropertyValue | null {
+		const v1 = props[xProp];
+		const v2 = props[yProp];
+		if (!v1 || !v2) {
+			return null;
+		}
+		if (v1.important !== v2.important) {
+			return null;
+		}
+		// Collapse equal global keywords (inherit/initial/etc.) to single value
+		const globalKeywords = new Set(['inherit', 'initial', 'unset', 'revert', 'revert-layer']);
+		if (v1.value === v2.value && globalKeywords.has(v1.value.toLowerCase())) {
+			return { value: v1.value, important: v1.important };
+		}
+		// Handle multi-layer (comma-separated) positions: interleave x and y per layer
+		const xLayers = v1.value.split(', ');
+		const yLayers = v2.value.split(', ');
+		if (xLayers.length > 1 && xLayers.length === yLayers.length) {
+			const layers = xLayers.map((x, i) => {
+				const y = yLayers[i];
+				if (x === y && globalKeywords.has(x.toLowerCase())) {
+					return x;
+				}
+				return `${x} ${y}`;
+			});
+			return { value: layers.join(', '), important: v1.important };
+		}
+		return { value: `${v1.value} ${v2.value}`, important: v1.important };
+	}
+
+	/**
+	 *
+	 * @param props
+	 * @param prop1
+	 * @param prop2
+	 */
+	private static getTwoValue(
+		props: PropertyStore,
+		prop1: string,
+		prop2: string
+	): ICSSStyleDeclarationPropertyValue | null {
+		const v1 = props[prop1];
+		const v2 = props[prop2];
+		if (!v1 || !v2) {
+			return null;
+		}
+		if (v1.important !== v2.important) {
+			return null;
+		}
+
+		if (v1.value === v2.value) {
+			return { value: v1.value, important: v1.important };
+		}
+		return { value: `${v1.value} ${v2.value}`, important: v1.important };
+	}
+
+	/**
+	 * Border shorthand: all 4 sides must have identical width/style/color.
+	 *
+	 * @param props The property store.
+	 * @returns Composed value or null.
+	 */
+	private static getBorder(props: PropertyStore): ICSSStyleDeclarationPropertyValue | null {
+		const sides = ['top', 'right', 'bottom', 'left'];
+		const widths = sides.map((s) => props[`border-${s}-width`]);
+		const styles = sides.map((s) => props[`border-${s}-style`]);
+		const colors = sides.map((s) => props[`border-${s}-color`]);
+
+		// All must be set
+		if (widths.some((w) => !w) || styles.some((s) => !s) || colors.some((c) => !c)) {
+			return null;
+		}
+
+		// All sides must match
+		const w0 = widths[0]!.value;
+		const s0 = styles[0]!.value;
+		const c0 = colors[0]!.value;
+		const imp = widths[0]!.important;
+
+		for (let i = 1; i < 4; i++) {
+			if (widths[i]!.value !== w0 || styles[i]!.value !== s0 || colors[i]!.value !== c0) {
+				return null;
+			}
+			if (
+				widths[i]!.important !== imp ||
+				styles[i]!.important !== imp ||
+				colors[i]!.important !== imp
+			) {
+				return null;
+			}
+		}
+
+		const allValues = [...widths, ...styles, ...colors].map((v) => v!.value);
+		const globalCollapse = this.collapseGlobal(allValues, imp);
+		if (globalCollapse) {
+			return globalCollapse;
+		}
+
+		const parts: string[] = [];
+		if (w0 !== 'medium') {
+			parts.push(w0);
+		}
+		parts.push(s0);
+		if (c0 !== 'currentcolor') {
+			parts.push(c0);
+		}
+		return { value: parts.join(' '), important: imp };
+	}
+
+	/**
+	 * Border side: width style color.
+	 *
+	 * @param props The property store.
+	 * @param widthProp Width property name.
+	 * @param styleProp Style property name.
+	 * @param colorProp Color property name.
+	 * @returns Composed value or null.
+	 */
+	private static getBorderSide(
+		props: PropertyStore,
+		widthProp: string,
+		styleProp: string,
+		colorProp: string
+	): ICSSStyleDeclarationPropertyValue | null {
+		const w = props[widthProp];
+		const s = props[styleProp];
+		const c = props[colorProp];
+		if (!w || !s || !c) {
+			return null;
+		}
+		if (w.important !== s.important || s.important !== c.important) {
+			return null;
+		}
+		const globalCollapse = this.collapseGlobal([w.value, s.value, c.value], w.important);
+		if (globalCollapse) {
+			return globalCollapse;
+		}
+		return { value: `${w.value} ${s.value} ${c.value}`, important: w.important };
+	}
+
+	/**
+	 * Border radius: 4 corners, optionally with / for vertical radii.
+	 *
+	 * @param props The property store.
+	 * @returns Composed value or null.
+	 */
+	private static getBorderRadius(props: PropertyStore): ICSSStyleDeclarationPropertyValue | null {
+		const tl = props['border-top-left-radius'];
+		const tr = props['border-top-right-radius'];
+		const br = props['border-bottom-right-radius'];
+		const bl = props['border-bottom-left-radius'];
+		if (!tl || !tr || !br || !bl) {
+			return null;
+		}
 		if (
-			!properties[propertyNames[0]]?.value ||
-			!properties[propertyNames[1]]?.value ||
-			!properties[propertyNames[2]]?.value ||
-			!properties[propertyNames[3]]?.value
+			tl.important !== tr.important ||
+			tr.important !== br.important ||
+			br.important !== bl.important
 		) {
 			return null;
 		}
 
-		const important =
-			properties[propertyNames[0]].important &&
-			properties[propertyNames[1]].important &&
-			properties[propertyNames[2]].important &&
-			properties[propertyNames[3]].important;
+		// Check if all are single values (no vertical component)
+		const values = [tl.value, tr.value, br.value, bl.value];
 
+		if (values.every((v) => !v.includes(' '))) {
+			// All single — collapse
+			if (values[0] === values[1] && values[1] === values[2] && values[2] === values[3]) {
+				return { value: values[0], important: tl.important };
+			}
+			if (values[0] === values[2] && values[1] === values[3]) {
+				return { value: `${values[0]} ${values[1]}`, important: tl.important };
+			}
+			if (values[1] === values[3]) {
+				return { value: `${values[0]} ${values[1]} ${values[2]}`, important: tl.important };
+			}
+			return { value: values.join(' '), important: tl.important };
+		}
+
+		// Has vertical components
+		return { value: values.join(' '), important: tl.important };
+	}
+
+	/**
+	 * Flex shorthand.
+	 *
+	 * @param props The property store.
+	 * @returns Composed value or null.
+	 */
+	private static getFlex(props: PropertyStore): ICSSStyleDeclarationPropertyValue | null {
+		const grow = props['flex-grow'];
+		const shrink = props['flex-shrink'];
+		const basis = props['flex-basis'];
+		if (!grow || !shrink || !basis) {
+			return null;
+		}
+		if (grow.important !== shrink.important || shrink.important !== basis.important) {
+			return null;
+		}
+
+		// Check global keyword collapse
+		const globalCollapse = this.collapseGlobal(
+			[grow.value, shrink.value, basis.value],
+			grow.important
+		);
+		if (globalCollapse) {
+			return globalCollapse;
+		}
+
+		return { value: `${grow.value} ${shrink.value} ${basis.value}`, important: grow.important };
+	}
+
+	/**
+	 * Columns shorthand.
+	 *
+	 * @param props The property store.
+	 * @returns Composed value or null.
+	 */
+	private static getColumns(props: PropertyStore): ICSSStyleDeclarationPropertyValue | null {
+		const width = props['column-width'];
+		const count = props['column-count'];
+		if (!width || !count) {
+			return null;
+		}
+		if (width.important !== count.important) {
+			return null;
+		}
+		return { value: `${width.value} ${count.value}`, important: width.important };
+	}
+
+	/**
+	 * List style shorthand.
+	 *
+	 * @param props The property store.
+	 * @returns Composed value or null.
+	 */
+	private static getListStyle(props: PropertyStore): ICSSStyleDeclarationPropertyValue | null {
+		const type = props['list-style-type'];
+		const position = props['list-style-position'];
+		const image = props['list-style-image'];
+		if (!type || !position || !image) {
+			return null;
+		}
+		if (type.important !== position.important || position.important !== image.important) {
+			return null;
+		}
+		const globalCollapse = this.collapseGlobal(
+			[type.value, position.value, image.value],
+			type.important
+		);
+		if (globalCollapse) {
+			return globalCollapse;
+		}
+
+		const parts = [type.value, position.value, image.value].filter((v) => v !== 'initial');
+		return { value: parts.join(' ') || 'none', important: type.important };
+	}
+
+	/**
+	 * Text decoration shorthand.
+	 *
+	 * @param props The property store.
+	 * @returns Composed value or null.
+	 */
+	private static getTextDecoration(props: PropertyStore): ICSSStyleDeclarationPropertyValue | null {
+		const line = props['text-decoration-line'];
+		const style = props['text-decoration-style'];
+		const color = props['text-decoration-color'];
+		if (!line || !style || !color) {
+			return null;
+		}
+		if (line.important !== style.important || style.important !== color.important) {
+			return null;
+		}
+		const globalCollapse = this.collapseGlobal(
+			[line.value, style.value, color.value],
+			line.important
+		);
+		if (globalCollapse) {
+			return globalCollapse;
+		}
+
+		const parts = [line.value];
+		if (style.value !== 'initial' && style.value !== 'solid') {
+			parts.push(style.value);
+		}
+		if (color.value !== 'initial' && color.value !== 'currentcolor') {
+			parts.push(color.value);
+		}
+		return { value: parts.join(' '), important: line.important };
+	}
+
+	/**
+	 * Font shorthand.
+	 *
+	 * @param props The property store.
+	 * @returns Composed value or null.
+	 */
+	private static getFont(props: PropertyStore): ICSSStyleDeclarationPropertyValue | null {
+		const fontStyle = props['font-style'];
+		const fontVariant = props['font-variant'];
+		const fontWeight = props['font-weight'];
+		const fontSize = props['font-size'];
+		const lineHeight = props['line-height'];
+		const fontFamily = props['font-family'];
+		if (!fontStyle || !fontWeight || !fontSize || !fontFamily) {
+			return null;
+		}
+
+		const imp = fontStyle.important;
+
+		// Collapse to a single global keyword (inherit, initial, unset, etc.) when all sub-properties match
+		const globalKeywords = new Set(['inherit', 'initial', 'unset', 'revert', 'revert-layer']);
+		const candidate = fontStyle.value.toLowerCase();
+		if (globalKeywords.has(candidate)) {
+			const allSame =
+				fontWeight.value === candidate &&
+				fontSize.value === candidate &&
+				fontFamily.value === candidate &&
+				(!fontVariant || fontVariant.value === candidate) &&
+				(!lineHeight || lineHeight.value === candidate);
+			if (allSame) {
+				return { value: candidate, important: imp };
+			}
+		}
+
+		const parts: string[] = [];
+		if (fontStyle.value !== 'normal') {
+			parts.push(fontStyle.value);
+		}
+		if (fontVariant && fontVariant.value !== 'normal') {
+			parts.push(fontVariant.value);
+		}
+		if (fontWeight.value !== 'normal' && fontWeight.value !== '400') {
+			parts.push(fontWeight.value);
+		}
+
+		let sizeStr = fontSize.value;
+		if (lineHeight && lineHeight.value !== 'normal') {
+			sizeStr += ' / ' + lineHeight.value;
+		}
+		parts.push(sizeStr);
+		parts.push(fontFamily.value);
+
+		return { value: parts.join(' '), important: imp };
+	}
+
+	/**
+	 * Background shorthand — simplified.
+	 *
+	 * @param props The property store.
+	 * @returns Composed value or null.
+	 */
+	private static getBackground(props: PropertyStore): ICSSStyleDeclarationPropertyValue | null {
+		const image = props['background-image'];
+		const color = props['background-color'];
+		const repeat = props['background-repeat'];
+		const posX = props['background-position-x'];
+		const posY = props['background-position-y'];
+		const size = props['background-size'];
+		const attachment = props['background-attachment'];
+		const origin = props['background-origin'];
+		const clip = props['background-clip'];
+
+		if (!image || !color || !repeat || !posX || !posY || !size || !attachment || !origin || !clip) {
+			return null;
+		}
+
+		const imp = color.important;
+
+		// Check global keyword collapse
+		const allValues = [image, color, repeat, posX, posY, size, attachment, origin, clip].map(
+			(v) => v!.value
+		);
+		const globalCollapse = this.collapseGlobal(allValues, imp);
+		if (globalCollapse) {
+			return globalCollapse;
+		}
+
+		// If all are initial except color, return just the color
 		if (
-			CSSStyleDeclarationValueParser.getGlobal(properties[propertyNames[0]].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties[propertyNames[1]].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties[propertyNames[2]].value) ||
-			CSSStyleDeclarationValueParser.getGlobal(properties[propertyNames[3]].value)
+			image.value === 'initial' &&
+			repeat.value === 'initial' &&
+			posX.value === 'initial' &&
+			posY.value === 'initial' &&
+			size.value === 'initial' &&
+			attachment.value === 'initial' &&
+			origin.value === 'initial' &&
+			clip.value === 'initial' &&
+			color.value !== 'initial'
 		) {
-			if (
-				properties[propertyNames[0]].value !== properties[propertyNames[1]].value ||
-				properties[propertyNames[0]].value !== properties[propertyNames[2]].value ||
-				properties[propertyNames[0]].value !== properties[propertyNames[3]].value
-			) {
+			return { value: color.value, important: imp };
+		}
+
+		// Build full background value
+		const parts: string[] = [];
+		if (image.value !== 'initial' && image.value !== 'none') {
+			parts.push(image.value);
+		}
+		if (posX.value !== 'initial' || posY.value !== 'initial') {
+			const pos = `${posX.value === 'initial' ? '0%' : posX.value} ${posY.value === 'initial' ? '0%' : posY.value}`;
+			if (size.value !== 'initial') {
+				parts.push(pos + ' / ' + size.value);
+			} else {
+				parts.push(pos);
+			}
+		}
+		if (repeat.value !== 'initial' && repeat.value !== 'repeat') {
+			parts.push(repeat.value);
+		}
+		if (attachment.value !== 'initial') {
+			parts.push(attachment.value);
+		}
+		if (origin.value !== 'initial') {
+			parts.push(origin.value);
+		}
+		if (clip.value !== 'initial') {
+			parts.push(clip.value);
+		}
+		if (color.value !== 'initial') {
+			parts.push(color.value);
+		}
+
+		return { value: parts.join(' ') || 'none', important: imp };
+	}
+
+	/**
+	 * Border image shorthand: source slice / width / outset repeat.
+	 *
+	 * @param props The property store.
+	 * @returns Composed value or null.
+	 */
+	private static getBorderImage(props: PropertyStore): ICSSStyleDeclarationPropertyValue | null {
+		const source = props['border-image-source'];
+		const slice = props['border-image-slice'];
+		const width = props['border-image-width'];
+		const outset = props['border-image-outset'];
+		const repeat = props['border-image-repeat'];
+		if (!source || !slice || !width || !outset || !repeat) {
+			return null;
+		}
+		if (
+			source.important !== slice.important ||
+			slice.important !== width.important ||
+			width.important !== outset.important ||
+			outset.important !== repeat.important
+		) {
+			return null;
+		}
+
+		const allValues = [source.value, slice.value, width.value, outset.value, repeat.value];
+		const globalCollapse = this.collapseGlobal(allValues, source.important);
+		if (globalCollapse) {
+			return globalCollapse;
+		}
+
+		// Always output: source slice / width / outset repeat
+		const parts: string[] = [];
+		const sourceVal = source.value === 'initial' ? 'none' : source.value;
+		const sliceVal = slice.value === 'initial' ? '100%' : slice.value;
+		const widthVal = width.value === 'initial' ? '1' : width.value;
+		const outsetVal = outset.value === 'initial' ? '0' : outset.value;
+		const repeatVal = repeat.value === 'initial' ? 'stretch' : repeat.value;
+
+		if (sourceVal !== 'none') {
+			parts.push(sourceVal);
+		}
+		parts.push(sliceVal);
+		parts.push('/');
+		parts.push(widthVal);
+		parts.push('/');
+		parts.push(outsetVal);
+		parts.push(repeatVal);
+
+		return { value: parts.join(' '), important: source.important };
+	}
+
+	/**
+	 * Generic fallback: concatenate all longhand values.
+	 *
+	 * @param name Shorthand name.
+	 * @param props The property store.
+	 * @returns Composed value or null.
+	 */
+	private static getGeneric(
+		name: string,
+		props: PropertyStore
+	): ICSSStyleDeclarationPropertyValue | null {
+		const longhands = CSS_SHORTHAND_TO_LONGHANDS[name];
+		if (!longhands) {
+			return null;
+		}
+
+		const values: string[] = [];
+		let imp: boolean | null = null;
+
+		for (const lh of longhands) {
+			const v = props[lh];
+			if (!v) {
 				return null;
 			}
-			return {
-				important,
-				value: properties[propertyNames[0]].value
-			};
+			if (imp === null) {
+				imp = v.important;
+			} else if (v.important !== imp) {
+				return null;
+			}
+			values.push(v.value);
 		}
 
-		const values = [properties[propertyNames[0]].value];
-
-		if (
-			properties[propertyNames[1]].value !== properties[propertyNames[0]].value ||
-			properties[propertyNames[2]].value !== properties[propertyNames[0]].value ||
-			properties[propertyNames[3]].value !== properties[propertyNames[1]].value
-		) {
-			values.push(properties[propertyNames[1]].value);
+		const globalCollapse = this.collapseGlobal(values, imp ?? false);
+		if (globalCollapse) {
+			return globalCollapse;
 		}
 
-		if (
-			properties[propertyNames[2]].value !== properties[propertyNames[0]].value ||
-			properties[propertyNames[3]].value !== properties[propertyNames[1]].value
-		) {
-			values.push(properties[propertyNames[2]].value);
+		// If all values are the same, collapse to a single value
+		if (values.every((v) => v === values[0])) {
+			return { value: values[0], important: imp ?? false };
 		}
 
-		if (properties[propertyNames[3]].value !== properties[propertyNames[1]].value) {
-			values.push(properties[propertyNames[3]].value);
-		}
-
-		return {
-			important,
-			value: values.join(' ')
-		};
+		return { value: values.join(' '), important: imp ?? false };
 	}
 }

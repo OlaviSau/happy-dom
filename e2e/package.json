@@ -1,0 +1,19 @@
+{
+	"name": "@happy-dom/e2e",
+	"private": true,
+	"version": "0.0.0",
+	"description": "End-to-end conformance tests comparing happy-dom output against headless Chrome.",
+	"type": "module",
+	"scripts": {
+		"test": "vitest run"
+	},
+	"devDependencies": {
+		"@types/node": ">=20.0.0",
+		"happy-dom": "^0.0.0",
+		"typescript": "^5.8.3",
+		"vitest": "^4.0.16"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	}
+}

@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CSSStyleDeclaration Behavior Capture</title>
+  <style>
+    body { font-family: monospace; font-size: 13px; }
+    .pass { color: green; }
+    .section { font-weight: bold; margin-top: 16px; font-size: 15px; }
+  </style>
+</head>
+<body>
+<h2>CSSStyleDeclaration Behavior Capture</h2>
+<p>Open this file in Chrome, then copy the JSON from the console or the pre block below.</p>
+<pre id="output"></pre>
+<script>
+// This script captures Chrome's exact CSSStyleDeclaration behavior.
+// Run it in Chrome to produce the ground-truth JSON that our generated code must match.
+
+const results = [];
+function test(category, name, fn) {
+  try {
+    const result = fn();
+    results.push({ category, name, ...result });
+  } catch (e) {
+    results.push({ category, name, error: e.message });
+  }
+}
+
+function freshStyle() {
+  const el = document.createElement('div');
+  return el.style;
+}
+
+// ============================================================
+// 1. SHORTHAND → LONGHAND EXPANSION
+// ============================================================
+
+test('shorthand-expansion', 'margin: single value', () => {
+  const s = freshStyle();
+  s.margin = '10px';
+  return {
+    marginTop: s.marginTop,
+    marginRight: s.marginRight,
+    marginBottom: s.marginBottom,
+    marginLeft: s.marginLeft,
+    margin: s.margin,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'margin: two values', () => {
+  const s = freshStyle();
+  s.margin = '10px 20px';
+  return {
+    marginTop: s.marginTop,
+    marginRight: s.marginRight,
+    marginBottom: s.marginBottom,
+    marginLeft: s.marginLeft,
+    margin: s.margin,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'margin: three values', () => {
+  const s = freshStyle();
+  s.margin = '10px 20px 30px';
+  return {
+    marginTop: s.marginTop,
+    marginRight: s.marginRight,
+    marginBottom: s.marginBottom,
+    marginLeft: s.marginLeft,
+    margin: s.margin,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'margin: four values', () => {
+  const s = freshStyle();
+  s.margin = '10px 20px 30px 40px';
+  return {
+    marginTop: s.marginTop,
+    marginRight: s.marginRight,
+    marginBottom: s.marginBottom,
+    marginLeft: s.marginLeft,
+    margin: s.margin,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'padding: single value', () => {
+  const s = freshStyle();
+  s.padding = '5px';
+  return {
+    paddingTop: s.paddingTop,
+    paddingRight: s.paddingRight,
+    paddingBottom: s.paddingBottom,
+    paddingLeft: s.paddingLeft,
+    padding: s.padding,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'border: full shorthand', () => {
+  const s = freshStyle();
+  s.border = '1px solid red';
+  return {
+    borderTopWidth: s.borderTopWidth,
+    borderTopStyle: s.borderTopStyle,
+    borderTopColor: s.borderTopColor,
+    borderRightWidth: s.borderRightWidth,
+    borderBottomWidth: s.borderBottomWidth,
+    borderLeftWidth: s.borderLeftWidth,
+    borderRightStyle: s.borderRightStyle,
+    borderBottomStyle: s.borderBottomStyle,
+    borderLeftStyle: s.borderLeftStyle,
+    borderRightColor: s.borderRightColor,
+    borderBottomColor: s.borderBottomColor,
+    borderLeftColor: s.borderLeftColor,
+    border: s.border,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'border-width: two values', () => {
+  const s = freshStyle();
+  s.borderWidth = '1px 2px';
+  return {
+    borderTopWidth: s.borderTopWidth,
+    borderRightWidth: s.borderRightWidth,
+    borderBottomWidth: s.borderBottomWidth,
+    borderLeftWidth: s.borderLeftWidth,
+    borderWidth: s.borderWidth,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'background: complex', () => {
+  const s = freshStyle();
+  s.background = 'url(img.png) center / cover no-repeat fixed padding-box';
+  return {
+    backgroundImage: s.backgroundImage,
+    backgroundPositionX: s.backgroundPositionX,
+    backgroundPositionY: s.backgroundPositionY,
+    backgroundSize: s.backgroundSize,
+    backgroundRepeat: s.backgroundRepeat,
+    backgroundAttachment: s.backgroundAttachment,
+    backgroundOrigin: s.backgroundOrigin,
+    backgroundClip: s.backgroundClip,
+    backgroundColor: s.backgroundColor,
+    background: s.background,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'background: simple color', () => {
+  const s = freshStyle();
+  s.background = 'red';
+  return {
+    backgroundImage: s.backgroundImage,
+    backgroundColor: s.backgroundColor,
+    backgroundRepeat: s.backgroundRepeat,
+    background: s.background,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'flex: single number', () => {
+  const s = freshStyle();
+  s.flex = '1';
+  return {
+    flexGrow: s.flexGrow,
+    flexShrink: s.flexShrink,
+    flexBasis: s.flexBasis,
+    flex: s.flex,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'flex: three values', () => {
+  const s = freshStyle();
+  s.flex = '2 3 100px';
+  return {
+    flexGrow: s.flexGrow,
+    flexShrink: s.flexShrink,
+    flexBasis: s.flexBasis,
+    flex: s.flex,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'font: complex', () => {
+  const s = freshStyle();
+  s.font = 'italic small-caps bold 16px/1.5 Arial, sans-serif';
+  return {
+    fontStyle: s.fontStyle,
+    fontVariant: s.fontVariant,
+    fontWeight: s.fontWeight,
+    fontSize: s.fontSize,
+    lineHeight: s.lineHeight,
+    fontFamily: s.fontFamily,
+    font: s.font,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'outline: full', () => {
+  const s = freshStyle();
+  s.outline = '2px dashed blue';
+  return {
+    outlineWidth: s.outlineWidth,
+    outlineStyle: s.outlineStyle,
+    outlineColor: s.outlineColor,
+    outline: s.outline,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'border-radius: four values', () => {
+  const s = freshStyle();
+  s.borderRadius = '10px 20px 30px 40px';
+  return {
+    borderTopLeftRadius: s.borderTopLeftRadius,
+    borderTopRightRadius: s.borderTopRightRadius,
+    borderBottomRightRadius: s.borderBottomRightRadius,
+    borderBottomLeftRadius: s.borderBottomLeftRadius,
+    borderRadius: s.borderRadius,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'overflow: two values', () => {
+  const s = freshStyle();
+  s.overflow = 'hidden scroll';
+  return {
+    overflowX: s.overflowX,
+    overflowY: s.overflowY,
+    overflow: s.overflow,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'text-decoration: full', () => {
+  const s = freshStyle();
+  s.textDecoration = 'underline wavy red';
+  return {
+    textDecorationLine: s.textDecorationLine,
+    textDecorationStyle: s.textDecorationStyle,
+    textDecorationColor: s.textDecorationColor,
+    textDecoration: s.textDecoration,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'gap: two values', () => {
+  const s = freshStyle();
+  s.gap = '10px 20px';
+  return {
+    rowGap: s.rowGap,
+    columnGap: s.columnGap,
+    gap: s.gap,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'place-items: two values', () => {
+  const s = freshStyle();
+  s.placeItems = 'center start';
+  return {
+    alignItems: s.alignItems,
+    justifyItems: s.justifyItems,
+    placeItems: s.placeItems,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-expansion', 'inset: four values', () => {
+  const s = freshStyle();
+  s.inset = '10px 20px 30px 40px';
+  return {
+    top: s.top,
+    right: s.right,
+    bottom: s.bottom,
+    left: s.left,
+    inset: s.inset,
+    cssText: s.cssText,
+  };
+});
+
+// ============================================================
+// 2. SHORTHAND RECOMPOSITION (reading shorthand from longhands)
+// ============================================================
+
+test('shorthand-recomposition', 'margin: all same → collapses', () => {
+  const s = freshStyle();
+  s.marginTop = '10px';
+  s.marginRight = '10px';
+  s.marginBottom = '10px';
+  s.marginLeft = '10px';
+  return { margin: s.margin, cssText: s.cssText };
+});
+
+test('shorthand-recomposition', 'margin: vertical/horizontal → two values', () => {
+  const s = freshStyle();
+  s.marginTop = '10px';
+  s.marginRight = '20px';
+  s.marginBottom = '10px';
+  s.marginLeft = '20px';
+  return { margin: s.margin, cssText: s.cssText };
+});
+
+test('shorthand-recomposition', 'margin: all different → four values', () => {
+  const s = freshStyle();
+  s.marginTop = '10px';
+  s.marginRight = '20px';
+  s.marginBottom = '30px';
+  s.marginLeft = '40px';
+  return { margin: s.margin, cssText: s.cssText };
+});
+
+test('shorthand-recomposition', 'margin: only some set → empty shorthand', () => {
+  const s = freshStyle();
+  s.marginTop = '10px';
+  s.marginRight = '20px';
+  // bottom and left not set
+  return { margin: s.margin, cssText: s.cssText };
+});
+
+test('shorthand-recomposition', 'border: all longhands match → collapses', () => {
+  const s = freshStyle();
+  s.borderTopWidth = '1px'; s.borderRightWidth = '1px';
+  s.borderBottomWidth = '1px'; s.borderLeftWidth = '1px';
+  s.borderTopStyle = 'solid'; s.borderRightStyle = 'solid';
+  s.borderBottomStyle = 'solid'; s.borderLeftStyle = 'solid';
+  s.borderTopColor = 'red'; s.borderRightColor = 'red';
+  s.borderBottomColor = 'red'; s.borderLeftColor = 'red';
+  return { border: s.border, cssText: s.cssText };
+});
+
+test('shorthand-recomposition', 'border: widths differ → empty shorthand', () => {
+  const s = freshStyle();
+  s.borderTopWidth = '1px'; s.borderRightWidth = '2px';
+  s.borderBottomWidth = '1px'; s.borderLeftWidth = '1px';
+  s.borderTopStyle = 'solid'; s.borderRightStyle = 'solid';
+  s.borderBottomStyle = 'solid'; s.borderLeftStyle = 'solid';
+  s.borderTopColor = 'red'; s.borderRightColor = 'red';
+  s.borderBottomColor = 'red'; s.borderLeftColor = 'red';
+  return { border: s.border, borderWidth: s.borderWidth, cssText: s.cssText };
+});
+
+test('shorthand-recomposition', 'flex: matching longhands', () => {
+  const s = freshStyle();
+  s.flexGrow = '1';
+  s.flexShrink = '0';
+  s.flexBasis = 'auto';
+  return { flex: s.flex, cssText: s.cssText };
+});
+
+// ============================================================
+// 3. LONGHAND OVERRIDE → SHORTHAND INVALIDATION
+// ============================================================
+
+test('shorthand-invalidation', 'set margin then override marginTop', () => {
+  const s = freshStyle();
+  s.margin = '10px';
+  s.marginTop = '20px';
+  return {
+    margin: s.margin,
+    marginTop: s.marginTop,
+    marginRight: s.marginRight,
+    marginBottom: s.marginBottom,
+    marginLeft: s.marginLeft,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-invalidation', 'set border then override borderTopWidth', () => {
+  const s = freshStyle();
+  s.border = '1px solid red';
+  s.borderTopWidth = '3px';
+  return {
+    border: s.border,
+    borderTopWidth: s.borderTopWidth,
+    borderRightWidth: s.borderRightWidth,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-invalidation', 'set padding then override paddingLeft', () => {
+  const s = freshStyle();
+  s.padding = '10px';
+  s.paddingLeft = '20px';
+  return {
+    padding: s.padding,
+    paddingTop: s.paddingTop,
+    paddingLeft: s.paddingLeft,
+    cssText: s.cssText,
+  };
+});
+
+test('shorthand-invalidation', 'set background then override backgroundColor', () => {
+  const s = freshStyle();
+  s.background = 'red';
+  s.backgroundColor = 'blue';
+  return {
+    background: s.background,
+    backgroundColor: s.backgroundColor,
+    cssText: s.cssText,
+  };
+});
+
+// ============================================================
+// 4. REMOVE PROPERTY
+// ============================================================
+
+test('remove-property', 'remove shorthand removes all longhands', () => {
+  const s = freshStyle();
+  s.margin = '10px';
+  s.removeProperty('margin');
+  return {
+    margin: s.margin,
+    marginTop: s.marginTop,
+    cssText: s.cssText,
+    length: s.length,
+  };
+});
+
+test('remove-property', 'remove longhand keeps other longhands', () => {
+  const s = freshStyle();
+  s.margin = '10px';
+  s.removeProperty('margin-top');
+  return {
+    margin: s.margin,
+    marginTop: s.marginTop,
+    marginRight: s.marginRight,
+    marginBottom: s.marginBottom,
+    marginLeft: s.marginLeft,
+    cssText: s.cssText,
+  };
+});
+
+test('remove-property', 'remove border removes all border longhands', () => {
+  const s = freshStyle();
+  s.border = '1px solid red';
+  const lenBefore = s.length;
+  s.removeProperty('border');
+  return {
+    lenBefore,
+    lenAfter: s.length,
+    borderTopWidth: s.borderTopWidth,
+    borderTopStyle: s.borderTopStyle,
+    borderTopColor: s.borderTopColor,
+    cssText: s.cssText,
+  };
+});
+
+// ============================================================
+// 5. VALUE NORMALIZATION
+// ============================================================
+
+test('value-normalization', 'color names are lowercased', () => {
+  const s = freshStyle();
+  s.color = 'RED';
+  return { color: s.color };
+});
+
+test('value-normalization', 'hex colors', () => {
+  const s = freshStyle();
+  s.color = '#ff0000';
+  return { color: s.color };
+});
+
+test('value-normalization', 'rgb colors', () => {
+  const s = freshStyle();
+  s.color = 'rgb(255, 0, 0)';
+  return { color: s.color };
+});
+
+test('value-normalization', 'zero length drops unit', () => {
+  const s = freshStyle();
+  s.marginTop = '0px';
+  return { marginTop: s.marginTop };
+});
+
+test('value-normalization', 'non-zero keeps unit', () => {
+  const s = freshStyle();
+  s.marginTop = '10px';
+  return { marginTop: s.marginTop };
+});
+
+test('value-normalization', 'keyword casing', () => {
+  const s = freshStyle();
+  s.display = 'BLOCK';
+  return { display: s.display };
+});
+
+test('value-normalization', 'border-style keyword', () => {
+  const s = freshStyle();
+  s.borderTopStyle = 'SOLID';
+  return { borderTopStyle: s.borderTopStyle };
+});
+
+// ============================================================
+// 6. INVALID VALUES (silently ignored)
+// ============================================================
+
+test('invalid-values', 'invalid keyword for display', () => {
+  const s = freshStyle();
+  s.display = 'banana';
+  return { display: s.display, cssText: s.cssText };
+});
+
+test('invalid-values', 'invalid value does not clear existing', () => {
+  const s = freshStyle();
+  s.display = 'block';
+  s.display = 'banana';
+  return { display: s.display };
+});
+
+test('invalid-values', 'invalid width value', () => {
+  const s = freshStyle();
+  s.width = 'abc';
+  return { width: s.width };
+});
+
+test('invalid-values', 'negative padding rejected', () => {
+  const s = freshStyle();
+  s.paddingTop = '-10px';
+  return { paddingTop: s.paddingTop };
+});
+
+test('invalid-values', 'negative margin accepted', () => {
+  const s = freshStyle();
+  s.marginTop = '-10px';
+  return { marginTop: s.marginTop };
+});
+
+// ============================================================
+// 7. EMPTY STRING REMOVES PROPERTY
+// ============================================================
+
+test('empty-string', 'setting empty string removes property', () => {
+  const s = freshStyle();
+  s.display = 'block';
+  s.display = '';
+  return { display: s.display, cssText: s.cssText, length: s.length };
+});
+
+test('empty-string', 'setting null-ish removes property', () => {
+  const s = freshStyle();
+  s.marginTop = '10px';
+  s.marginTop = '';
+  return { marginTop: s.marginTop, cssText: s.cssText };
+});
+
+// ============================================================
+// 8. PRIORITY / !important
+// ============================================================
+
+test('priority', 'setProperty with important', () => {
+  const s = freshStyle();
+  s.setProperty('color', 'red', 'important');
+  return {
+    color: s.color,
+    priority: s.getPropertyPriority('color'),
+    cssText: s.cssText,
+  };
+});
+
+test('priority', 'shorthand with important expands to important longhands', () => {
+  const s = freshStyle();
+  s.setProperty('margin', '10px', 'important');
+  return {
+    marginTopPriority: s.getPropertyPriority('margin-top'),
+    marginRightPriority: s.getPropertyPriority('margin-right'),
+    marginPriority: s.getPropertyPriority('margin'),
+    cssText: s.cssText,
+  };
+});
+
+test('priority', 'cssText with important', () => {
+  const s = freshStyle();
+  s.cssText = 'color: red !important; display: block;';
+  return {
+    color: s.color,
+    colorPriority: s.getPropertyPriority('color'),
+    display: s.display,
+    displayPriority: s.getPropertyPriority('display'),
+    cssText: s.cssText,
+  };
+});
+
+// ============================================================
+// 9. cssText SERIALIZATION ORDER & FORMAT
+// ============================================================
+
+test('csstext', 'single property', () => {
+  const s = freshStyle();
+  s.color = 'red';
+  return { cssText: s.cssText };
+});
+
+test('csstext', 'multiple properties', () => {
+  const s = freshStyle();
+  s.color = 'red';
+  s.display = 'block';
+  s.marginTop = '10px';
+  return { cssText: s.cssText };
+});
+
+test('csstext', 'shorthand collapses in cssText', () => {
+  const s = freshStyle();
+  s.marginTop = '10px';
+  s.marginRight = '10px';
+  s.marginBottom = '10px';
+  s.marginLeft = '10px';
+  return { cssText: s.cssText };
+});
+
+test('csstext', 'set via cssText', () => {
+  const s = freshStyle();
+  s.cssText = 'color: red; display: block; margin: 10px;';
+  return {
+    color: s.color,
+    display: s.display,
+    margin: s.margin,
+    marginTop: s.marginTop,
+    cssText: s.cssText,
+  };
+});
+
+test('csstext', 'cssText replaces all', () => {
+  const s = freshStyle();
+  s.color = 'red';
+  s.display = 'block';
+  s.cssText = 'width: 100px;';
+  return {
+    color: s.color,
+    display: s.display,
+    width: s.width,
+    cssText: s.cssText,
+  };
+});
+
+// ============================================================
+// 10. length AND item()
+// ============================================================
+
+test('length-item', 'length reflects set properties', () => {
+  const s = freshStyle();
+  s.color = 'red';
+  s.display = 'block';
+  return { length: s.length };
+});
+
+test('length-item', 'shorthand expands in length', () => {
+  const s = freshStyle();
+  s.margin = '10px';
+  return { length: s.length };
+});
+
+test('length-item', 'item returns kebab-case names', () => {
+  const s = freshStyle();
+  s.backgroundColor = 'red';
+  return { item0: s.item(0), length: s.length };
+});
+
+test('length-item', 'item out of bounds returns empty string', () => {
+  const s = freshStyle();
+  s.color = 'red';
+  return { item0: s.item(0), item1: s.item(1), item99: s.item(99) };
+});
+
+test('length-item', 'border shorthand length', () => {
+  const s = freshStyle();
+  s.border = '1px solid red';
+  return { length: s.length };
+});
+
+// ============================================================
+// 11. getPropertyValue vs PROPERTY ACCESSOR
+// ============================================================
+
+test('accessor-parity', 'getPropertyValue matches accessor', () => {
+  const s = freshStyle();
+  s.marginTop = '10px';
+  return {
+    accessor: s.marginTop,
+    getPropertyValue: s.getPropertyValue('margin-top'),
+    match: s.marginTop === s.getPropertyValue('margin-top'),
+  };
+});
+
+test('accessor-parity', 'camelCase set, kebab-case get', () => {
+  const s = freshStyle();
+  s.backgroundColor = 'red';
+  return {
+    accessor: s.backgroundColor,
+    getPropertyValue: s.getPropertyValue('background-color'),
+    match: s.backgroundColor === s.getPropertyValue('background-color'),
+  };
+});
+
+// ============================================================
+// 12. CSS CUSTOM PROPERTIES (variables)
+// ============================================================
+
+test('custom-properties', 'set and get custom property', () => {
+  const s = freshStyle();
+  s.setProperty('--my-color', 'red');
+  return {
+    value: s.getPropertyValue('--my-color'),
+    cssText: s.cssText,
+    length: s.length,
+  };
+});
+
+test('custom-properties', 'remove custom property', () => {
+  const s = freshStyle();
+  s.setProperty('--my-color', 'red');
+  s.removeProperty('--my-color');
+  return {
+    value: s.getPropertyValue('--my-color'),
+    cssText: s.cssText,
+  };
+});
+
+// ============================================================
+// 13. WEBKIT / ALIAS PROPERTIES
+// ============================================================
+
+test('aliases', 'webkitTransform sets transform', () => {
+  const s = freshStyle();
+  s.webkitTransform = 'rotate(45deg)';
+  return {
+    webkitTransform: s.webkitTransform,
+    transform: s.transform,
+    cssText: s.cssText,
+  };
+});
+
+// ============================================================
+// OUTPUT
+// ============================================================
+
+const output = JSON.stringify(results, null, 2);
+document.getElementById('output').textContent = output;
+console.log('CSSStyleDeclaration behavior capture:');
+console.log(output);
+</script>
+</body>
+</html>

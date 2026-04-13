@@ -5,7 +5,8 @@
 	"workspaces": [
 		"packages/*",
 		"packages/@happy-dom/*",
-		"integration-test/*"
+		"integration-test/*",
+		"e2e"
 	],
 	"scripts": {
 		"compile": "DO_NOT_TRACK=1 turbo run compile",
