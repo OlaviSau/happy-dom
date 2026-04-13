@@ -1,15 +1,16 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * CLI entry point for the happy-dom CSS codegen tool.
  *
  * Usage: node dist/index.js [--out <dir>] [--offline]
  *
  * Downloads the latest css_properties.json5 from Chromium's repository,
- * then builds IR → runs all generators → writes output.
+ * then builds IR, runs all generators and writes output.
  *
  * Flags:
- *   --out <dir>   Output directory (default: ./out)
- *   --offline     Skip download, use cached data/css-properties.json5
+ * --out <dir> Output directory (default: ./out)
+ * --offline   Skip download, use cached data/css-properties.json5
  */
 
 import * as fs from 'node:fs';

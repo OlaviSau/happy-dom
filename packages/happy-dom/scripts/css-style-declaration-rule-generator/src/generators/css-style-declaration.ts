@@ -3,11 +3,11 @@
  * for CSSStyleDeclaration.ts.
  */
 
-import type { PropertyIR, PropertyDefinition } from '../ir/property-ir.js';
+import type { IPropertyIR, IPropertyDefinition } from '../ir/property-ir.js';
 import { kebabToCamelCase } from '../utils/name-utils.js';
 import { fileHeader } from '../utils/template-utils.js';
 
-const VENDOR_PREFIXES = ['webkit', 'moz', 'ms'] as const;
+const VENDOR_PREFIXES = <const>['webkit', 'moz', 'ms'];
 
 /**
  * If a camelCase name starts with a lowercase vendor prefix,
@@ -28,7 +28,7 @@ function upperVendorVariant(camel: string): string | null {
  * Generates the camelCase → kebab-case property map as a separate file.
  * @param ir
  */
-export function generateCSSPropertyNameMap(ir: PropertyIR): string {
+export function generateCSSPropertyNameMap(ir: IPropertyIR): string {
 	let out = fileHeader();
 
 	// Collect all properties (longhands + shorthands) — no aliases (those are separate)
@@ -107,7 +107,7 @@ const CSSStyleDeclarationPropertyNameMap: Record<string, string> = {
  * BEGIN_CSS_DECLARATIONS and END_CSS_DECLARATIONS markers.
  * @param ir
  */
-export function generateCSSDeclarations(ir: PropertyIR): string {
+export function generateCSSDeclarations(ir: IPropertyIR): string {
 	const accessorProps: { camel: string }[] = [];
 	const seen = new Set<string>();
 

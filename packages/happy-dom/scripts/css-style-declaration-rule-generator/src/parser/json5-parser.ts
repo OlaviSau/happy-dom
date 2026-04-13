@@ -1,14 +1,15 @@
 /**
- * Parses Chromium's css_properties.json5 into a typed PropertyIR.
+ * Parses Chromium's css_properties.json5 into a typed IPropertyIR.
  */
 
 import JSON5 from 'json5';
 import { readFileSync } from 'node:fs';
-import type { PropertyDefinition, PropertyIR } from '../ir/property-ir.js';
+import type { IPropertyDefinition, IPropertyIR } from '../ir/property-ir.js';
 import { kebabToCamelCase } from '../utils/name-utils.js';
 
 /** Represents a raw entry from the JSON5 data array. */
-interface RawProperty {
+interface IRawProperty {
+	[key: string]: unknown;
 	name: string;
 	longhands?: string[];
 	alias_for?: string;
@@ -28,7 +29,6 @@ interface RawProperty {
 	property_methods?: string[];
 	style_builder_template?: string;
 	type_name?: string;
-	[key: string]: unknown;
 }
 
 /**
@@ -74,7 +74,7 @@ const ACCEPTS_NEGATIVE = new Set([
  * Initial CSS values for properties based on their type/keywords.
  * @param raw
  */
-function deriveInitialValue(raw: RawProperty): string {
+function deriveInitialValue(raw: IRawProperty): string {
 	// Properties with explicit default_value in C++ — we map known patterns
 	// to CSS-level initial values
 	if (raw.keywords && raw.keywords.length > 0) {
@@ -165,20 +165,20 @@ function deriveInitialValue(raw: RawProperty): string {
 }
 
 /**
- * Parse the JSON5 file and return a PropertyIR.
+ * Parse the JSON5 file and return a IPropertyIR.
  * @param filePath
  */
-export function parseJSON5(filePath: string): PropertyIR {
+export function parseJSON5(filePath: string): IPropertyIR {
 	const raw = readFileSync(filePath, 'utf-8');
 
 	// The JSON5 file has a top-level { parameters: {...}, data: [...] } structure.
 	// We strip single-line comments that use // since json5 supports them.
 	const parsed = JSON5.parse(raw);
 
-	const entries: RawProperty[] = parsed.data || [];
+	const entries: IRawProperty[] = parsed.data || [];
 
-	const properties: PropertyDefinition[] = [];
-	const byName = new Map<string, PropertyDefinition>();
+	const properties: IPropertyDefinition[] = [];
+	const byName = new Map<string, IPropertyDefinition>();
 
 	for (const entry of entries) {
 		if (!entry.name) {
@@ -206,7 +206,7 @@ export function parseJSON5(filePath: string): PropertyIR {
 		// Determine type
 		const hasLonghands = Array.isArray(entry.longhands) && entry.longhands.length > 0;
 		const isAlias = typeof entry.alias_for === 'string';
-		const type: PropertyDefinition['type'] = isAlias
+		const type: IPropertyDefinition['type'] = isAlias
 			? 'alias'
 			: hasLonghands
 				? 'shorthand'
@@ -221,7 +221,7 @@ export function parseJSON5(filePath: string): PropertyIR {
 			computable = type === 'longhand';
 		}
 
-		const def: PropertyDefinition = {
+		const def: IPropertyDefinition = {
 			name,
 			camelCaseName: kebabToCamelCase(name),
 			type,

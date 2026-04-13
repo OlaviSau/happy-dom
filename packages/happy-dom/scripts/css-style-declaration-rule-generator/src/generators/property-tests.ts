@@ -2,18 +2,18 @@
  * Generates a comprehensive per-property test suite.
  *
  * For every exposed CSS property, emits:
- *   - set/get round-trip with a valid value
- *   - keyword validation (first keyword accepted)
- *   - invalid value rejection (for keyword-only properties)
- *   - shorthand expansion (all longhands populated)
- *   - alias delegation (canonical receives value)
- *   - removeProperty works
+ * - set/get round-trip with a valid value
+ * - keyword validation (first keyword accepted)
+ * - invalid value rejection (for keyword-only properties)
+ * - shorthand expansion (all longhands populated)
+ * - alias delegation (canonical receives value)
+ * - removeProperty works
  *
  * Output is a standalone ESM (.mjs) file that imports the compiled
  * CSSStyleDeclaration and runs all assertions.
  */
 
-import type { PropertyIR, PropertyDefinition } from '../ir/property-ir.js';
+import type { IPropertyIR, IPropertyDefinition } from '../ir/property-ir.js';
 import { kebabToCamelCase } from '../utils/name-utils.js';
 
 // Same sets used in set-parser.ts — keep in sync
@@ -194,7 +194,7 @@ const NUMBER_PROPERTIES = new Set([
  * Pick a representative valid CSS value for a longhand property.
  * @param prop
  */
-function pickValidValue(prop: PropertyDefinition): string {
+function pickValidValue(prop: IPropertyDefinition): string {
 	// Color properties
 	if (COLOR_PROPERTIES.has(prop.name)) {
 		return 'red';
@@ -255,7 +255,7 @@ function pickValidValue(prop: PropertyDefinition): string {
  * Pick a second (different) valid value for testing overwrite.
  * @param prop
  */
-function pickSecondValue(prop: PropertyDefinition): string {
+function pickSecondValue(prop: IPropertyDefinition): string {
 	if (COLOR_PROPERTIES.has(prop.name)) {
 		return 'blue';
 	}
@@ -281,7 +281,7 @@ function pickSecondValue(prop: PropertyDefinition): string {
  * @param prop
  */
 function pickShorthandValue(
-	prop: PropertyDefinition
+	prop: IPropertyDefinition
 ): { value: string; expected: Record<string, string> } | null {
 	const name = prop.name;
 
@@ -490,7 +490,7 @@ function pickShorthandValue(
 	};
 }
 
-function isKeywordOnly(prop: PropertyDefinition): boolean {
+function isKeywordOnly(prop: IPropertyDefinition): boolean {
 	if (prop.keywords.length === 0) {
 		return false;
 	}
@@ -505,7 +505,7 @@ function isKeywordOnly(prop: PropertyDefinition): boolean {
 	return types.length === 0 || types.every((t) => t === 'Keyword');
 }
 
-export function generatePropertyTests(ir: PropertyIR): string {
+export function generatePropertyTests(ir: IPropertyIR): string {
 	const lines: string[] = [];
 	let testCount = 0;
 

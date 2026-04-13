@@ -3,7 +3,7 @@
  * Parsed from Chromium's css_properties.json5.
  */
 
-export interface PropertyDefinition {
+export interface IPropertyDefinition {
 	/** kebab-case name, e.g. "background-color" */
 	name: string;
 	/** camelCase JS accessor name, e.g. "backgroundColor" */
@@ -34,17 +34,17 @@ export interface PropertyDefinition {
 	acceptsNegative: boolean;
 }
 
-export interface PropertyIR {
+export interface IPropertyIR {
 	/** All properties (longhands + shorthands + aliases), excluding internal */
-	properties: PropertyDefinition[];
+	properties: IPropertyDefinition[];
 	/** Longhands only */
-	longhands: PropertyDefinition[];
+	longhands: IPropertyDefinition[];
 	/** Shorthands only */
-	shorthands: PropertyDefinition[];
+	shorthands: IPropertyDefinition[];
 	/** Aliases only */
-	aliases: PropertyDefinition[];
-	/** Map: property name → PropertyDefinition */
-	byName: Map<string, PropertyDefinition>;
+	aliases: IPropertyDefinition[];
+	/** Map: property name → IPropertyDefinition */
+	byName: Map<string, IPropertyDefinition>;
 	/** Map: shorthand name → ordered longhand names */
 	shorthandToLonghands: Map<string, string[]>;
 	/** Map: alias name → canonical property name */

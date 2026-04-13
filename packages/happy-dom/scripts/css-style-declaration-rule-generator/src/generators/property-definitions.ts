@@ -3,7 +3,7 @@
  * These are data-only TypeScript files (exported const objects/maps).
  */
 
-import type { PropertyIR } from '../ir/property-ir.js';
+import type { IPropertyIR } from '../ir/property-ir.js';
 import { fileHeader, quote, objectKey, formatArray } from '../utils/template-utils.js';
 
 /**
@@ -34,7 +34,7 @@ function formatShorthandArray(items: string[], indentLevel: number, keyLen: numb
  * Generate CSSPropertyDefinitions.ts — registry of all property metadata.
  * @param ir
  */
-export function generatePropertyDefinitions(ir: PropertyIR): string {
+export function generatePropertyDefinitions(ir: IPropertyIR): string {
 	let out = fileHeader();
 
 	out += `export interface ICSSPropertyMeta {\n`;
@@ -57,7 +57,7 @@ export function generatePropertyDefinitions(ir: PropertyIR): string {
 
 	const longhands = ir.longhands;
 	for (let i = 0; i < longhands.length; i++) {
-		const p = longhands[i] as any;
+		const p = <any>longhands[i];
 		if (p.comment) {
 			out += `\t${p.comment}\n`;
 		}
@@ -88,7 +88,7 @@ export function generatePropertyDefinitions(ir: PropertyIR): string {
 			name: 'animation',
 			camelCase: 'animation',
 			inherited: false,
-			keywords: [] as string[],
+			keywords: <string[]>[],
 			initialValue: '',
 			acceptsNegative: false
 		}
@@ -129,7 +129,7 @@ export function generatePropertyDefinitions(ir: PropertyIR): string {
  * Generate CSSShorthandDefinitions.ts — shorthand → longhand mappings.
  * @param ir
  */
-export function generateShorthandDefinitions(ir: PropertyIR): string {
+export function generateShorthandDefinitions(ir: IPropertyIR): string {
 	let out = fileHeader();
 
 	out += `/**\n * Shorthand → ordered longhand property names.\n`;
@@ -166,7 +166,7 @@ export function generateShorthandDefinitions(ir: PropertyIR): string {
  * Generate CSSAliasDefinitions.ts — alias → canonical property mappings.
  * @param ir
  */
-export function generateAliasDefinitions(ir: PropertyIR): string {
+export function generateAliasDefinitions(ir: IPropertyIR): string {
 	let out = fileHeader();
 
 	out += `/**\n * Alias property name → canonical property name.\n`;

@@ -5,7 +5,7 @@
  * It validates incoming CSS values and returns a map of longhand properties.
  */
 
-import type { PropertyIR, PropertyDefinition } from '../ir/property-ir.js';
+import type { IPropertyIR, IPropertyDefinition } from '../ir/property-ir.js';
 import { fileHeader, quote, objectKey, shorthandToMethodName } from '../utils/template-utils.js';
 
 /**
@@ -193,7 +193,7 @@ const NUMBER_PROPERTIES = new Set([
 	'font-size-adjust'
 ]);
 
-export function generatePropertyTypeSets(ir: PropertyIR): string {
+export function generatePropertyTypeSets(ir: IPropertyIR): string {
 	let out = fileHeader();
 
 	const emitSet = (exportName: string, items: Iterable<string>): void => {
@@ -235,7 +235,7 @@ export function generatePropertyTypeSets(ir: PropertyIR): string {
 	return out;
 }
 
-export function generateSetParser(ir: PropertyIR): string {
+export function generateSetParser(ir: IPropertyIR): string {
 	let out = fileHeader();
 
 	out += `import CSSStyleDeclarationValueParser from './CSSStyleDeclarationValueParser.js';
@@ -744,7 +744,7 @@ ${generateShorthandDispatch(ir)}
 	return out;
 }
 
-function generateShorthandDispatch(ir: PropertyIR): string {
+function generateShorthandDispatch(ir: IPropertyIR): string {
 	// Ordered list of shorthand names and their dispatch targets.
 	// - null: use shorthandToMethodName() to derive the method name
 	// - 'longhand': dispatch to parseLonghand(name, trimmed, important)
@@ -820,7 +820,7 @@ function generateShorthandDispatch(ir: PropertyIR): string {
 	return out;
 }
 
-function generateLonghandParser(ir: PropertyIR): string {
+function generateLonghandParser(ir: IPropertyIR): string {
 	let out = `\t/**
 \t * Parse a longhand property value.
 \t *
@@ -1014,7 +1014,6 @@ function generateLonghandParser(ir: PropertyIR): string {
 
 	return out;
 }
-
 
 function generateBoxModelExpander(
 	shorthand: string,
@@ -2019,7 +2018,6 @@ function generateBackgroundExpander(): string {
 `;
 }
 
-
 function generateIsGradientToken(): string {
 	return `
 \t/**
@@ -2271,7 +2269,7 @@ function generateColumnsExpander(): string {
 `;
 }
 
-function generateGenericShorthandFallback(ir: PropertyIR): string {
+function generateGenericShorthandFallback(ir: IPropertyIR): string {
 	return `
 \t/**
 \t * Generic shorthand fallback: for shorthands without specific parsers,

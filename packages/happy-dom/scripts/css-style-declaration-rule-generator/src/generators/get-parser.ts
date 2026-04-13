@@ -4,10 +4,10 @@
  * The GetParser implements B2 (shorthand recomposition from longhands).
  */
 
-import type { PropertyIR } from '../ir/property-ir.js';
+import type { IPropertyIR } from '../ir/property-ir.js';
 import { fileHeader, quote } from '../utils/template-utils.js';
 
-export function generateGetParser(ir: PropertyIR): string {
+export function generateGetParser(ir: IPropertyIR): string {
 	let out = fileHeader();
 
 	out += `import type ICSSStyleDeclarationPropertyValue from './ICSSStyleDeclarationPropertyValue.js';

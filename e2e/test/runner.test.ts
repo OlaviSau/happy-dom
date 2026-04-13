@@ -9,7 +9,7 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 /**
  * Directory that mirrors the browser-specific fixture layout:
- *   e2e/chrome/<category>/<test>.html
+ * e2e/chrome/<category>/<test>.html
  */
 const CHROME_DIR = resolve(__dirname, '../chrome');
 

@@ -2,7 +2,7 @@
  * Generates CSSStyleDeclarationValueParser.ts — value validation utilities.
  */
 
-import type { PropertyIR } from '../ir/property-ir.js';
+import type { IPropertyIR } from '../ir/property-ir.js';
 import { fileHeader } from '../utils/template-utils.js';
 
 const NAMED_COLORS = [
@@ -167,7 +167,7 @@ export function generateNamedColors(): string {
 	return out;
 }
 
-export function generateValueParser(ir: PropertyIR): string {
+export function generateValueParser(ir: IPropertyIR): string {
 	let out = fileHeader();
 
 	out += `import { CSS_PROPERTY_KEYWORDS } from '../property-definitions/CSSPropertyDefinitions.js';
