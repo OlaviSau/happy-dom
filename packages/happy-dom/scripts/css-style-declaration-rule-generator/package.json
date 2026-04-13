@@ -1,0 +1,20 @@
+{
+  "name": "css-style-declaration-rule-generator",
+  "version": "1.0.0",
+  "description": "Code generator that reads Chromium's css_properties.json5 and emits TypeScript CSSStyleDeclaration for happy-dom",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "generate": "node --enable-source-maps dist/index.js",
+    "generate:offline": "node --enable-source-maps dist/index.js --offline",
+    "generate:to-src": "node --enable-source-maps dist/index.js --offline --out ../../src",
+    "test": "node --enable-source-maps tests/smoke-test.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "json5": "^2.2.3"
+  }
+}

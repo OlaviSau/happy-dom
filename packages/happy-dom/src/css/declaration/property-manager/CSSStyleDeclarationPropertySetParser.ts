@@ -251,11 +251,13 @@ function normalizeFontFamily(value: string): string | null {
 	return normalized.join(', ');
 }
 
+
 /**
  * Parses and validates CSS values, decomposing shorthands into longhands (B1).
  * Returns a map of longhand property → { value, important }, or null if invalid.
  */
 export default class CSSStyleDeclarationPropertySetParser {
+
 	/**
 	 * Parse a property value and return the resulting longhand map.
 	 * Returns null if the value is invalid (B6).
@@ -413,6 +415,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 				}
 				break;
 			}
+
 		}
 
 		// Dispatch to longhand parsers
@@ -574,6 +577,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 
 		return null;
 	}
+
 
 	/**
 	 * Parse margin shorthand.
@@ -911,10 +915,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 	 * @param important Whether the value has !important.
 	 * @returns Longhand property map or null.
 	 */
-	private static parseScrollMarginBlock(
-		value: string,
-		important: boolean
-	): IPropertyValueMap | null {
+	private static parseScrollMarginBlock(value: string, important: boolean): IPropertyValueMap | null {
 		const parts = value.trim().split(/\s+/);
 		if (parts.length < 1 || parts.length > 2) {
 			return null;
@@ -943,10 +944,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 	 * @param important Whether the value has !important.
 	 * @returns Longhand property map or null.
 	 */
-	private static parseScrollMarginInline(
-		value: string,
-		important: boolean
-	): IPropertyValueMap | null {
+	private static parseScrollMarginInline(value: string, important: boolean): IPropertyValueMap | null {
 		const parts = value.trim().split(/\s+/);
 		if (parts.length < 1 || parts.length > 2) {
 			return null;
@@ -975,10 +973,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 	 * @param important Whether the value has !important.
 	 * @returns Longhand property map or null.
 	 */
-	private static parseScrollPaddingBlock(
-		value: string,
-		important: boolean
-	): IPropertyValueMap | null {
+	private static parseScrollPaddingBlock(value: string, important: boolean): IPropertyValueMap | null {
 		const parts = value.trim().split(/\s+/);
 		if (parts.length < 1 || parts.length > 2) {
 			return null;
@@ -1007,10 +1002,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 	 * @param important Whether the value has !important.
 	 * @returns Longhand property map or null.
 	 */
-	private static parseScrollPaddingInline(
-		value: string,
-		important: boolean
-	): IPropertyValueMap | null {
+	private static parseScrollPaddingInline(value: string, important: boolean): IPropertyValueMap | null {
 		const parts = value.trim().split(/\s+/);
 		if (parts.length < 1 || parts.length > 2) {
 			return null;
@@ -1042,7 +1034,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 	private static parseBorderRadius(value: string, important: boolean): IPropertyValueMap | null {
 		// border-radius: top-left top-right bottom-right bottom-left
 		// Can also have / for horizontal/vertical radii (e.g. 10px 20px / 5px 10px)
-		const slashParts = value.split('/').map((s) => s.trim());
+		const slashParts = value.split('/').map(s => s.trim());
 		if (slashParts.length > 2) {
 			return null;
 		}
@@ -1105,7 +1097,10 @@ export default class CSSStyleDeclarationPropertySetParser {
 	 * @param important Whether the value has !important.
 	 * @returns Longhand property map or null.
 	 */
-	private static parseBorderSideToAll(value: string, important: boolean): IPropertyValueMap | null {
+	private static parseBorderSideToAll(
+		value: string,
+		important: boolean
+	): IPropertyValueMap | null {
 		const parsed = this.parseBorderComponents(value);
 		if (!parsed) {
 			return null;
@@ -1155,15 +1150,10 @@ export default class CSSStyleDeclarationPropertySetParser {
 			if (!used.has('style') && BORDER_STYLE_KEYWORDS.has(lower)) {
 				style = lower;
 				used.add('style');
-			} else if (
-				!used.has('width') &&
-				(BORDER_WIDTH_KEYWORDS.has(lower) ||
-					CSSStyleDeclarationValueParser.getLength(part, false) !== null)
-			) {
-				width =
-					lower === part.toLowerCase()
-						? (CSSStyleDeclarationValueParser.getLength(part, false) ?? lower)
-						: lower;
+			} else if (!used.has('width') && (BORDER_WIDTH_KEYWORDS.has(lower) ||
+					CSSStyleDeclarationValueParser.getLength(part, false) !== null)) {
+				width = lower === part.toLowerCase() ?
+					(CSSStyleDeclarationValueParser.getLength(part, false) ?? lower) : lower;
 				used.add('width');
 			} else if (!used.has('color')) {
 				const c = CSSStyleDeclarationValueParser.getColor(part);
@@ -1263,10 +1253,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 	 * @param important Whether the value has !important.
 	 * @returns Longhand property map or null.
 	 */
-	private static parseBorderBlockStart(
-		value: string,
-		important: boolean
-	): IPropertyValueMap | null {
+	private static parseBorderBlockStart(value: string, important: boolean): IPropertyValueMap | null {
 		const parsed = this.parseBorderComponents(value);
 		if (!parsed) {
 			return null;
@@ -1304,10 +1291,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 	 * @param important Whether the value has !important.
 	 * @returns Longhand property map or null.
 	 */
-	private static parseBorderInlineStart(
-		value: string,
-		important: boolean
-	): IPropertyValueMap | null {
+	private static parseBorderInlineStart(value: string, important: boolean): IPropertyValueMap | null {
 		const parsed = this.parseBorderComponents(value);
 		if (!parsed) {
 			return null;
@@ -1354,10 +1338,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 		const validated: string[] = [];
 		for (const part of parts) {
 			const lower = part.toLowerCase();
-			if (
-				BORDER_WIDTH_KEYWORDS.has(lower) ||
-				CSSStyleDeclarationValueParser.getLength(part, false) !== null
-			) {
+			if (BORDER_WIDTH_KEYWORDS.has(lower) || CSSStyleDeclarationValueParser.getLength(part, false) !== null) {
 				validated.push(CSSStyleDeclarationValueParser.getLength(part, false) ?? lower);
 			} else {
 				return null;
@@ -1603,7 +1584,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			}
 		}
 
-		const [x, y = x] = parts.map((p) => p.toLowerCase());
+		const [x, y = x] = parts.map(p => p.toLowerCase());
 		return {
 			'overflow-x': { value: x, important },
 			'overflow-y': { value: y, important }
@@ -1626,10 +1607,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 		const validated: string[] = [];
 		for (const part of parts) {
 			const lower = part.toLowerCase();
-			if (lower === 'normal') {
-				validated.push(lower);
-				continue;
-			}
+			if (lower === 'normal') { validated.push(lower); continue; }
 			const v = CSSStyleDeclarationValueParser.getLength(part, false);
 			if (v === null) {
 				return null;
@@ -1708,10 +1686,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 	 * @param important Whether the value has !important.
 	 * @returns Longhand property map or null.
 	 */
-	private static parseOverscrollBehavior(
-		value: string,
-		important: boolean
-	): IPropertyValueMap | null {
+	private static parseOverscrollBehavior(value: string, important: boolean): IPropertyValueMap | null {
 		const parts = value.trim().split(/\s+/);
 		if (parts.length < 1 || parts.length > 2) {
 			return null;
@@ -1724,7 +1699,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			}
 		}
 
-		const [x, y = x] = parts.map((p) => p.toLowerCase());
+		const [x, y = x] = parts.map(p => p.toLowerCase());
 		return {
 			'overscroll-behavior-x': { value: x, important },
 			'overscroll-behavior-y': { value: y, important }
@@ -1740,49 +1715,21 @@ export default class CSSStyleDeclarationPropertySetParser {
 	 */
 	private static parseFont(value: string, important: boolean): IPropertyValueMap | null {
 		// System fonts
-		const systemFonts = new Set([
-			'caption',
-			'icon',
-			'menu',
-			'message-box',
-			'small-caption',
-			'status-bar'
-		]);
+		const systemFonts = new Set(['caption', 'icon', 'menu', 'message-box', 'small-caption', 'status-bar']);
 		const lower = value.trim().toLowerCase();
 		if (systemFonts.has(lower)) {
-			return { font: { value: lower, important } };
+			return { 'font': { value: lower, important } };
 		}
 
 		// font: [style] [variant] [weight] [stretch] size[/line-height] family
 		// This is a simplified parser that handles common cases
 		const fontStyles = new Set(['italic', 'oblique', 'normal']);
 		const fontVariants = new Set(['small-caps', 'normal']);
-		const fontWeights = new Set([
-			'bold',
-			'bolder',
-			'lighter',
-			'normal',
-			'100',
-			'200',
-			'300',
-			'400',
-			'500',
-			'600',
-			'700',
-			'800',
-			'900'
-		]);
-		const fontStretches = new Set([
-			'ultra-condensed',
-			'extra-condensed',
-			'condensed',
-			'semi-condensed',
-			'normal',
-			'semi-expanded',
-			'expanded',
-			'extra-expanded',
-			'ultra-expanded'
-		]);
+		const fontWeights = new Set(['bold', 'bolder', 'lighter', 'normal',
+			'100', '200', '300', '400', '500', '600', '700', '800', '900']);
+		const fontStretches = new Set(['ultra-condensed', 'extra-condensed', 'condensed',
+			'semi-condensed', 'normal', 'semi-expanded', 'expanded',
+			'extra-expanded', 'ultra-expanded']);
 
 		// Split by comma first to separate font family
 		const commaIndex = value.indexOf(',');
@@ -1816,21 +1763,11 @@ export default class CSSStyleDeclarationPropertySetParser {
 		// Parse optional style/variant/weight/stretch
 		while (i < parts.length - 2) {
 			const p = parts[i].toLowerCase();
-			if (fontStyles.has(p) && fontStyle === 'normal') {
-				fontStyle = p;
-				i++;
-			} else if (fontVariants.has(p) && fontVariant === 'normal' && p !== 'normal') {
-				fontVariant = p;
-				i++;
-			} else if (fontWeights.has(p) && fontWeight === 'normal') {
-				fontWeight = p;
-				i++;
-			} else if (fontStretches.has(p) && fontStretch === 'normal' && p !== 'normal') {
-				fontStretch = p;
-				i++;
-			} else if (p === 'normal') {
-				i++;
-			} // 'normal' can appear for any of these
+			if (fontStyles.has(p) && fontStyle === 'normal') { fontStyle = p; i++; }
+			else if (fontVariants.has(p) && fontVariant === 'normal' && p !== 'normal') { fontVariant = p; i++; }
+			else if (fontWeights.has(p) && fontWeight === 'normal') { fontWeight = p; i++; }
+			else if (fontStretches.has(p) && fontStretch === 'normal' && p !== 'normal') { fontStretch = p; i++; }
+			else if (p === 'normal') { i++; } // 'normal' can appear for any of these
 			else {
 				break;
 			}
@@ -1961,6 +1898,7 @@ export default class CSSStyleDeclarationPropertySetParser {
 			'background-position-y': { value: yValues.join(', '), important }
 		};
 	}
+
 
 	/**
 	 * Parse background shorthand.
@@ -2314,9 +2252,8 @@ export default class CSSStyleDeclarationPropertySetParser {
 				style = lower;
 			} else if (color === 'initial') {
 				const c = CSSStyleDeclarationValueParser.getColor(part);
-				if (c) {
-					color = c;
-				} else {
+				if (c) { color = c; }
+				else {
 					return null;
 				}
 			} else {

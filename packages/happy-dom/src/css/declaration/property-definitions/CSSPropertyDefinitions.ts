@@ -18,16 +18,6 @@ export interface ICSSPropertyMeta {
  * All non-internal CSS longhand properties.
  */
 export const CSS_LONGHAND_PROPERTIES: Record<string, ICSSPropertyMeta> = {
-	// 'animation' is stored as a single raw value (not expanded to longhands)
-	// since we don't have a full animation shorthand parser.
-	animation: {
-		name: 'animation',
-		camelCase: 'animation',
-		inherited: false,
-		keywords: [],
-		initialValue: '',
-		acceptsNegative: false
-	},
 	'animation-composition': {
 		name: 'animation-composition',
 		camelCase: 'animationComposition',
@@ -324,7 +314,15 @@ export const CSS_LONGHAND_PROPERTIES: Record<string, ICSSPropertyMeta> = {
 		name: 'font-size-adjust',
 		camelCase: 'fontSizeAdjust',
 		inherited: true,
-		keywords: ['none', 'ex-height', 'cap-height', 'ch-width', 'ic-width', 'ic-height', 'from-font'],
+		keywords: [
+			'none',
+			'ex-height',
+			'cap-height',
+			'ch-width',
+			'ic-width',
+			'ic-height',
+			'from-font'
+		],
 		initialValue: '',
 		acceptsNegative: false
 	},
@@ -1513,7 +1511,7 @@ export const CSS_LONGHAND_PROPERTIES: Record<string, ICSSPropertyMeta> = {
 		name: 'flex-basis',
 		camelCase: 'flexBasis',
 		inherited: false,
-		keywords: ['auto', 'fill', 'fit-content', 'min-content', 'max-content', 'content'],
+		keywords: ['auto', 'fit-content', 'min-content', 'max-content', 'content', 'fill'],
 		initialValue: '',
 		acceptsNegative: false
 	},
@@ -2173,14 +2171,6 @@ export const CSS_LONGHAND_PROPERTIES: Record<string, ICSSPropertyMeta> = {
 		inherited: false,
 		keywords: ['thin', 'medium', 'thick'],
 		initialValue: '0px',
-		acceptsNegative: false
-	},
-	overflow: {
-		name: 'overflow',
-		camelCase: 'overflow',
-		inherited: false,
-		keywords: ['visible', 'hidden', 'clip', 'scroll', 'auto', 'overlay'],
-		initialValue: 'visible',
 		acceptsNegative: false
 	},
 	'overflow-anchor': {
@@ -4390,7 +4380,27 @@ export const CSS_LONGHAND_PROPERTIES: Record<string, ICSSPropertyMeta> = {
 		keywords: [],
 		initialValue: '',
 		acceptsNegative: false
-	}
+	},
+	// 'overflow' is stored as a single raw value (not expanded to longhands)
+	// since we don't have a full overflow shorthand parser.
+	overflow: {
+		name: 'overflow',
+		camelCase: 'overflow',
+		inherited: false,
+		keywords: ['visible', 'hidden', 'clip', 'scroll', 'auto', 'overlay'],
+		initialValue: 'visible',
+		acceptsNegative: false
+	},
+	// 'animation' is stored as a single raw value (not expanded to longhands)
+	// since we don't have a full animation shorthand parser.
+	animation: {
+		name: 'animation',
+		camelCase: 'animation',
+		inherited: false,
+		keywords: [],
+		initialValue: '',
+		acceptsNegative: false
+	},
 };
 
 /**

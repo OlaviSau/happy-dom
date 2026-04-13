@@ -901,7 +901,7 @@ const CSSStyleDeclarationPropertyNameMap: Record<string, string> = {
 	WebkitUserSelect: '-webkit-user-select',
 	wordWrap: 'word-wrap',
 	// eslint-disable-next-line @typescript-eslint/dot-notation
-	float: 'float'
+	'float': 'float'
 };
 
 export default CSSStyleDeclarationPropertyNameMap;
