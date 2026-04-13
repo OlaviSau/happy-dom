@@ -3064,7 +3064,7 @@ describe('CSSStyleDeclaration', () => {
 			expect(element.getAttribute('style')).toBe('top: 0px;');
 		});
 
-		it('Removes style attribute on element if empty value is sent', () => {
+		it('Sets style attribute to empty string on element if empty value is sent', () => {
 			const declaration = new CSSStyleDeclaration(PropertySymbol.illegalConstructor, window, {
 				element
 			});
@@ -3073,7 +3073,7 @@ describe('CSSStyleDeclaration', () => {
 
 			declaration.setProperty('border', '');
 
-			expect(element.getAttribute('style')).toBe(null);
+			expect(element.getAttribute('style')).toBe('');
 		});
 
 		it('Can set a CSS variable.', () => {
@@ -3200,7 +3200,7 @@ describe('CSSStyleDeclaration', () => {
 			expect(declaration.cssText).toBe('border: 2px solid green; font-size: 12px;');
 		});
 
-		it('Removes style attribute on element if there are no CSS properties left.', () => {
+		it('Sets style attribute to empty string on element if there are no CSS properties left.', () => {
 			const declaration = new CSSStyleDeclaration(PropertySymbol.illegalConstructor, window, {
 				element
 			});
@@ -3210,7 +3210,7 @@ describe('CSSStyleDeclaration', () => {
 			declaration.removeProperty('border');
 			declaration.removeProperty('border-radius');
 
-			expect(element.getAttribute('style')).toBe(null);
+			expect(element.getAttribute('style')).toBe('');
 		});
 	});
 
