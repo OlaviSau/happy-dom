@@ -294,11 +294,8 @@ export default class CSSStyleDeclaration {
 		if (this.#element) {
 			// e2e/chrome/css/css-style-declaration/setProperty-element-style-attribute.html
 			this.#cache.attributeValue = propertyManager.toString();
-			if (this.#cache.attributeValue) {
+			if (this.#cache.attributeValue || this.#element.hasAttribute('style')) {
 				this.#element.setAttribute('style', this.#cache.attributeValue);
-			} else if (this.#element.hasAttribute('style')) {
-				// Chrome keeps the style attribute as "" rather than removing it.
-				this.#element.setAttribute('style', '');
 			}
 		}
 	}
@@ -324,11 +321,8 @@ export default class CSSStyleDeclaration {
 
 		if (this.#element) {
 			this.#cache.attributeValue = propertyManager.toString();
-			if (this.#cache.attributeValue) {
+			if (this.#cache.attributeValue || this.#element.hasAttribute('style')) {
 				this.#element.setAttribute('style', this.#cache.attributeValue);
-			} else if (this.#element.hasAttribute('style')) {
-				// Chrome keeps the style attribute as "" rather than removing it.
-				this.#element.setAttribute('style', '');
 			}
 		}
 
